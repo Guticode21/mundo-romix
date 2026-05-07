@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mundo Romix — Admin</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#5e0b15" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Mundo Romix" />
+  <link rel="apple-touch-icon" href="img/logo.png" />
+  <meta name="description" content="Panel de administración de Mundo Romix."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="css/estilos.css"/>
+  <style>
+    .admin-hero{text-align:center;padding:28px 20px 10px}
+    .admin-hero h2{font-size:1.5rem;font-weight:800;color:var(--vinotinto);margin-bottom:4px}
+    .admin-hero p{font-size:.85rem;color:var(--oro);font-weight:600}
+    .admin-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--vinotinto),#8b1a2a);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 20px rgba(94,11,21,.3)}
+    .admin-avatar i{font-size:2rem;color:#fff}
+    .preview-box{background:rgba(255,255,255,.35);border-radius:var(--radius-sm);padding:14px;margin-top:12px;font-size:.9rem;font-style:italic;color:var(--vinotinto);border:1px dashed var(--cristal-borde);min-height:50px}
+    .current-value{font-size:.8rem;color:var(--oro);font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px}
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="topbar-title">
+      <img src="img/logo.png" alt="Logo" style="width: 30px; height: 30px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
+      Admin Panel
+    </span>
+    <button class="topbar-btn" onclick="cerrarSesion()" title="Cerrar sesión" id="btnLogout">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </header>
+
+  <div class="page-container">
+
+    <!-- HERO -->
+    <div class="admin-hero fade-in">
+      <div class="admin-avatar"><i class="fa-solid fa-crown"></i></div>
+      <h2>Hola, Guti 👑</h2>
+      <p>Controla lo que Fabi ve en su dashboard</p>
+    </div>
+
+    <!-- ALERTA -->
+    <div id="adminAlerta" class="alert alert-success hidden" style="margin-top:16px">
+      ✅ Guardado correctamente
+    </div>
+
+    <!-- SECCIÓN: ESTADO ACTUAL -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:20px">
+      <div class="admin-section-title"><i class="fa-solid fa-chart-simple"></i> ESTADO ACTUAL</div>
+
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fa-solid fa-file-pdf"></i></div>
+        <div class="stat-text">
+          <div class="stat-label">PDF DE HITOS</div>
+          <div class="stat-valor" id="statPdf">Sin configurar</div>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+        <div class="stat-text">
+          <div class="stat-label">MENSAJE PERSONALIZADO</div>
+          <div class="stat-valor" id="statMsg">No activo</div>
+        </div>
+      </div>
+
+      <div class="stat-item">
+        <div class="stat-icon"><i class="fa-solid fa-images"></i></div>
+        <div class="stat-text">
+          <div class="stat-label">FOTOS EN GALERÍA</div>
+          <div class="stat-valor" id="statFotos">0 fotos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: MENSAJE PERSONALIZADO -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
+      <div class="admin-section-title"><i class="fa-solid fa-pen-fancy"></i> MENSAJE PARA FABI</div>
+      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:14px;line-height:1.5">
+        Este mensaje se guardará en tu GitHub y aparecerá en el móvil de Fabi automáticamente.
+      </p>
+      <div class="input-group">
+        <i class="fa-solid fa-heart"></i>
+        <textarea id="adminMensaje" class="input-field" placeholder="Escribe algo especial para Fabi..." rows="4"></textarea>
+      </div>
+      <div class="preview-box" id="previewMsg">Vista previa del mensaje...</div>
+    </div>
+
+    <!-- SECCIÓN: GALERÍA DE FOTOS -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
+      <div class="admin-section-title"><i class="fa-solid fa-camera-retro"></i> GALERÍA DE FOTOS</div>
+      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:8px;line-height:1.5">
+        Escribe los nombres de las fotos (ej: 1.jpg, 2.jpg) separados por coma.
+      </p>
+      <div class="input-group" style="align-items:flex-start">
+        <i class="fa-solid fa-images" style="top:18px"></i>
+        <textarea id="adminFotos" class="input-field" placeholder="1.jpg, 2.jpg, viaje.png..." rows="3"></textarea>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: PDF HITOS -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
+      <div class="admin-section-title"><i class="fa-solid fa-file-pdf"></i> ARCHIVO PDF DE HITOS</div>
+      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:14px;line-height:1.5">
+        Nombre del archivo PDF (ej: hitos.pdf).
+      </p>
+      <div class="input-group">
+        <i class="fa-solid fa-link"></i>
+        <input type="text" id="adminPdf" class="input-field" placeholder="hitos.pdf"/>
+      </div>
+    </div>
+
+    <!-- SECCIÓN: GALERÍA DE FOTOS -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
+      <div class="admin-section-title"><i class="fa-solid fa-camera-retro"></i> GALERÍA DE FOTOS</div>
+      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:8px;line-height:1.5">
+        Pon las fotos en la carpeta <strong>img/</strong> de la app y escribe sus nombres aquí, separados por coma.
+      </p>
+      <p style="font-size:.78rem;color:var(--oro);margin-bottom:14px;font-weight:600">
+        Ej: <em>foto1.jpg, cumple.png, playa.jpg</em>
+      </p>
+      <div class="input-group" style="align-items:flex-start">
+        <i class="fa-solid fa-images" style="top:18px"></i>
+        <textarea id="adminFotos" class="input-field" placeholder="foto1.jpg, foto2.jpg, playa.png..." rows="3"></textarea>
+      </div>
+      <!-- Preview de miniaturas -->
+      <div id="previewFotos" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px"></div>
+    </div>
+
+    <!-- SECCIÓN: PDF HITOS -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
+      <div class="admin-section-title"><i class="fa-solid fa-file-pdf"></i> ARCHIVO PDF DE HITOS</div>
+      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:14px;line-height:1.5">
+        Nombre del archivo PDF que se abrirá al tocar "Nuestros Hitos" (ej: <strong>hitos.pdf</strong>).
+      </p>
+      <div class="input-group">
+        <i class="fa-solid fa-link"></i>
+        <input type="text" id="adminPdf" class="input-field" placeholder="hitos.pdf"/>
+      </div>
+    </div>
+
+    <!-- BOTONES DE ACCIÓN -->
+    <div class="fade-in" style="margin-top:20px">
+      <button class="btn btn-primary btn-full" onclick="guardarConfigAdmin()" id="btnGuardar">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+      </button>
+      <button class="btn btn-outline btn-full mt-16" onclick="limpiarMensajeAdmin()" id="btnLimpiar">
+        <i class="fa-solid fa-broom"></i> Limpiar Mensaje
+      </button>
+    </div>
+
+    <!-- ACCESO RÁPIDO -->
+    <div class="glass-card fade-in" style="padding:18px;margin-top:20px;text-align:center">
+      <div class="admin-section-title" style="justify-content:center"><i class="fa-solid fa-eye"></i> VISTA RÁPIDA</div>
+      <a href="dashboard.html" class="btn btn-gold" style="margin-top:8px" onclick="localStorage.setItem('mr_usuario','Fabi')">
+        <i class="fa-solid fa-eye"></i> Ver como Fabi
+      </a>
+    </div>
+
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/github-sync.js"></script>
+  <script>
+    const usuario = protegerPagina('Guti');
+    
+    if(usuario){
+      // 1. Cargar datos desde GitHub al abrir
+      async function cargarDatos() {
+        const datos = await obtenerDatosNube();
+        if (datos) {
+          document.getElementById('adminMensaje').value = datos.mensaje || '';
+          document.getElementById('adminPdf').value = datos.pdfHitos || '';
+          document.getElementById('adminFotos').value = datos.fotos || '';
+          
+          document.getElementById('statPdf').textContent = datos.pdfHitos || 'Sin configurar';
+          document.getElementById('statMsg').textContent = datos.mensaje ? 'Activo ✅' : 'No activo';
+          document.getElementById('previewMsg').textContent = datos.mensaje || 'Vista previa del mensaje...';
+          
+          const numFotos = (datos.fotos || '').split(',').filter(f => f.trim()).length;
+          document.getElementById('statFotos').textContent = numFotos + ' fotos';
+        }
+      }
+      cargarDatos();
+
+      // 2. Guardar cambios en GitHub
+      window.guardarConfigAdmin = async function() {
+        const btn = document.getElementById('btnGuardar');
+        const originalText = btn.innerHTML;
+        
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando...';
+
+        const msg = document.getElementById('adminMensaje').value;
+        const pdf = document.getElementById('adminPdf').value;
+        const fotos = document.getElementById('adminFotos').value;
+        
+        const exito = await guardarDatosNube({
+          mensaje: msg,
+          pdfHitos: pdf,
+          fotos: fotos
+        });
+
+        if (exito) {
+          mostrarAlertaAdmin('✅ ¡Sincronizado con éxito en GitHub!');
+          cargarDatos();
+        } else {
+          alert('Error al sincronizar. Revisa tu conexión.');
+        }
+        
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      };
+
+      // Limpiar mensaje
+      window.limpiarMensajeAdmin = async function() {
+        if(confirm('¿Seguro que quieres borrar el mensaje?')) {
+          await guardarDatosNube({ mensaje: '' });
+          cargarDatos();
+          mostrarAlertaAdmin('🧹 Mensaje borrado');
+        }
+      };
+
+      // Preview en vivo del mensaje
+      document.getElementById('adminMensaje').addEventListener('input', function(){
+        document.getElementById('previewMsg').textContent = this.value || 'Vista previa del mensaje...';
+      });
+    }
+  </script>
+</body>
+</html>

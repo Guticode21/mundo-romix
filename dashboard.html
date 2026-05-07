@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mundo Romix — Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#5e0b15" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Mundo Romix" />
+  <link rel="apple-touch-icon" href="img/logo.png" />
+  <meta name="description" content="Panel personal de Fabi en Mundo Romix."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="css/estilos.css"/>
+  <style>
+    .bienvenida-texto{font-size:1.1rem;font-weight:600;color:var(--vinotinto);margin-top:18px;text-align:center;line-height:1.5}
+    .nombre-user{font-weight:800;background:linear-gradient(135deg,var(--vinotinto),var(--oro));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .amor-corazon{font-size:4rem;animation:heartbeat 1.2s ease-in-out infinite;display:block;margin-bottom:12px}
+    .lightbox-img{max-width:100%;max-height:60vh;border-radius:16px;margin-bottom:12px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
+    .lightbox-caption{color:var(--vinotinto);font-weight:700;text-align:center;font-size:.95rem}
+  </style>
+</head>
+<body>
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <span class="topbar-title">
+      <img src="img/logo.png" alt="Logo" style="width: 30px; height: 30px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
+      Mundo Romix
+    </span>
+    <button class="topbar-btn" onclick="cerrarSesion()" title="Cerrar sesión" id="btnLogout">
+      <i class="fa-solid fa-right-from-bracket"></i>
+    </button>
+  </header>
+
+  <div class="page-container">
+
+    <!-- BIENVENIDA -->
+    <div class="bienvenida-texto fade-in">
+      Hola, <span class="nombre-user" id="nombreUsuario">Fabi</span> 💖
+      <br/><small style="font-size:.8rem;color:var(--oro)">Bienvenida a nuestro rincón</small>
+    </div>
+
+    <!-- CONTADOR -->
+    <div class="glass-card contador-wrap fade-in" style="margin-top:20px">
+      <div class="contador-label"><i class="fa-solid fa-infinity"></i> Juntos desde el 1 de septiembre 2024</div>
+      <div class="contador-display" id="contadorTiempo">Cargando...</div>
+      <div style="margin-top:10px"><span class="corazon-animado">❤️</span></div>
+    </div>
+
+    <!-- MENSAJE DIARIO -->
+    <div class="glass-card mensaje-diario fade-in">
+      <div class="msg-tag" id="msgTag"><i class="fa-solid fa-envelope-open-text"></i> 💝 Mensaje del día</div>
+      <div class="msg-texto" id="msgTexto">Cargando mensaje...</div>
+      <div class="msg-firma">— Con amor, Guti 💌</div>
+    </div>
+
+    <!-- SECCIONES GRID -->
+    <div class="section-grid fade-in">
+      <div class="glass-card section-card" onclick="abrirModal('modalFotos'); renderGaleria();" id="cardFotos">
+        <div class="card-icon"><i class="fa-solid fa-camera-retro"></i></div>
+        <div class="card-title">Fotos</div>
+      </div>
+      <div class="glass-card section-card" onclick="abrirModal('modalAmor')" id="cardAmor">
+        <div class="card-icon"><i class="fa-solid fa-paper-plane"></i></div>
+        <div class="card-title">Amor enviado</div>
+      </div>
+      <div class="glass-card section-card card-full" onclick="abrirHitosPdf()" id="btnHitosPdf">
+        <div class="card-icon"><i class="fa-solid fa-trophy"></i></div>
+        <div>
+          <div class="card-title">Nuestros Hitos</div>
+          <small style="color:var(--oro);font-weight:600;font-size:.75rem">Ver PDF especial</small>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL: FOTOS -->
+  <div class="modal-overlay" id="modalFotos">
+    <div class="modal-sheet glass-card">
+      <div class="modal-handle"></div>
+      <div class="modal-title"><i class="fa-solid fa-images"></i> Nuestra Galería</div>
+      <p style="font-size:.85rem;color:var(--oro);margin-bottom:16px;font-weight:600">Toca una foto para verla 📸</p>
+      <div class="galeria-grid" id="galeriaGrid">
+        <!-- Fotos cargadas dinámicamente desde localStorage -->
+      </div>
+      <p id="galeriaHint" style="font-size:.8rem;color:rgba(94,11,21,.5);margin-top:14px;text-align:center">
+        Guti debe agregar las fotos desde el panel admin 📸
+      </p>
+      <button class="btn btn-outline btn-full mt-16" onclick="cerrarModal('modalFotos')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: AMOR ENVIADO -->
+  <div class="modal-overlay" id="modalAmor">
+    <div class="modal-sheet glass-card">
+      <div class="modal-handle"></div>
+      <div class="modal-title"><i class="fa-solid fa-heart-circle-check"></i> Amor Enviado</div>
+      <div style="text-align:center;padding:20px 0">
+        <span class="amor-corazon">💖</span>
+        <p style="font-weight:600;color:var(--vinotinto)">Guti te ha enviado todo su amor hoy.</p>
+        <p style="font-size:.9rem;margin-top:10px;color:var(--oro)">Cada día te elige a ti. 💛</p>
+        <div style="margin-top:20px;font-size:2rem;letter-spacing:6px">💐🧸🌹✨💎</div>
+      </div>
+      <button class="btn btn-outline btn-full mt-16" onclick="cerrarModal('modalAmor')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+    </div>
+  </div>
+
+  <!-- MODAL: LIGHTBOX -->
+  <div class="modal-overlay" id="modalGaleria">
+    <div class="modal-sheet glass-card" style="text-align:center">
+      <div class="modal-handle"></div>
+      <img src="" alt="Foto" class="lightbox-img" id="lightboxImg"/>
+      <p class="lightbox-caption" id="lightboxCaption"></p>
+      <button class="btn btn-outline btn-full mt-16" onclick="cerrarModal('modalGaleria')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+    </div>
+  </div>
+
+  <script src="js/mensajes.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/mensajes.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/github-sync.js"></script>
+  <script>
+    const usuario = protegerPagina('Fabi');
+    if(usuario){
+      document.getElementById('nombreUsuario').textContent = usuario;
+      iniciarContador('contadorTiempo', new Date(2024, 8, 1));
+
+      // 1. Sincronizar mensaje y PDF desde GitHub
+      async function sincronizarNube() {
+        const datos = await obtenerDatosNube();
+        const msgTextoEl = document.getElementById('msgTexto');
+        
+        if (datos) {
+          // Guardar en localStorage para respaldo offline
+          if(datos.mensaje) localStorage.setItem('mr_mensaje_admin', datos.mensaje);
+          if(datos.pdfHitos) localStorage.setItem('mr_pdf_hitos', datos.pdfHitos);
+          if(datos.fotos) localStorage.setItem('mr_galeria_fotos', datos.fotos);
+          
+          // Actualizar UI
+          msgTextoEl.textContent = datos.mensaje || obtenerMensajeDelDia().texto;
+        } else {
+          // Fallback a mensajes automáticos si no hay internet o datos
+          msgTextoEl.textContent = obtenerMensajeDelDia().texto;
+        }
+      }
+      sincronizarNube();
+
+      // 2. Renderizar Galería (GitHub + Locales)
+      window.renderGaleriaUniversal = async function() {
+        const grid = document.getElementById('galeriaGrid');
+        const hint = document.getElementById('galeriaHint');
+        if(!grid) return;
+        
+        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--oro);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando recuerdos...</div>';
+
+        const datos = await obtenerDatosNube();
+        grid.innerHTML = ''; // Limpiar spinner
+
+        // A. FOTOS REGISTRADAS EN GITHUB (Nombres de archivos)
+        let nombres = [];
+        if(datos && datos.fotos) {
+          nombres = datos.fotos.split(',').map(s => s.trim()).filter(s => s);
+        } else {
+          // Si no hay en GitHub, usar las predefinidas (1.jpg a 20.jpg)
+          nombres = ["1.jpg","2.jpg","3.jpg","4.jpg","5.jpg","6.jpg","7.jpg","8.jpg","9.jpg","10.jpg","11.jpg","12.jpg","13.jpg","14.jpg","15.jpg","16.jpg","17.jpg","18.jpg","19.jpg","20.jpg"];
+        }
+
+        nombres.forEach(nombre => {
+          const img = document.createElement('img');
+          // Si empieza por http, es una URL externa, si no, es local en img/
+          img.src = nombre.startsWith('http') ? nombre : 'img/' + nombre;
+          img.loading = "lazy";
+          img.onclick = () => abrirImagen(img.src, "Nuestro recuerdo 💖");
+          img.onerror = () => img.remove();
+          grid.appendChild(img);
+        });
+
+        if(hint) hint.style.display = 'none';
+      };
+
+      // Evento del botón de fotos
+      document.getElementById('cardFotos').onclick = () => {
+        abrirModal('modalFotos');
+        renderGaleriaUniversal();
+      };
+
+      // === PWA: Notificaciones ===
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('./sw.js').then((reg) => {
+          if (Notification.permission === 'default') Notification.requestPermission();
+          
+          const verificarNotif = () => {
+            const hoy = new Date().toDateString();
+            if (localStorage.getItem('mr_ultima_notif') !== hoy && Notification.permission === 'granted') {
+              const hora = new Date().getHours();
+              if (hora >= 8 && hora < 22) {
+                localStorage.setItem('mr_ultima_notif', hoy);
+                const msg = obtenerMensajeDelDia().texto;
+                if (reg.active) {
+                  reg.active.postMessage({ tipo: 'notificar_ahora', titulo: '💖 Mundo Romix', cuerpo: msg.substring(0, 50) + '...' });
+                }
+              }
+            }
+          };
+          verificarNotif();
+          setInterval(verificarNotif, 1000 * 60 * 60);
+        });
+      }
+    }
+  </script>
+</body>
+</html>

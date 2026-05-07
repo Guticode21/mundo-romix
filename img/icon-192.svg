@@ -1,0 +1,33 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffdeeb"/>
+      <stop offset="100%" style="stop-color:#e2d5f3"/>
+    </linearGradient>
+    <linearGradient id="heartGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5e0b15"/>
+      <stop offset="100%" style="stop-color:#8b1a2a"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="roundRect">
+      <rect width="192" height="192" rx="115" ry="115"/>
+    </clipPath>
+  </defs>
+  <!-- Fondo con clip redondeado -->
+  <rect width="192" height="192" rx="115" ry="115" fill="url(#bgGrad)"/>
+  <!-- Brillo superior glassmorphism -->
+  <ellipse cx="256" cy="120" rx="200" ry="90" fill="rgba(255,255,255,0.35)"/>
+  <!-- Corazon -->
+  <path d="M256 370 C256 370 110 270 110 175 C110 130 145 100 185 100 C210 100 235 115 256 140 C277 115 302 100 327 100 C367 100 402 130 402 175 C402 270 256 370 256 370 Z"
+        fill="url(#heartGrad)" filter="url(#glow)"/>
+  <!-- Linea de pulso cardiaco encima del corazon -->
+  <polyline points="145,220 185,220 205,175 225,260 245,195 265,230 285,220 340,220"
+            fill="none" stroke="#b89b5e" stroke-width="10" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  <!-- Texto MR -->
+  <text x="256" y="450" text-anchor="middle" font-family="Georgia, serif" font-size="72" font-weight="bold" fill="#b89b5e" letter-spacing="8">MR</text>
+  <!-- Brillo borde dorado -->
+  <rect width="192" height="192" rx="115" ry="115" fill="none" stroke="#b89b5e" stroke-width="8" opacity="0.5"/>
+</svg>
