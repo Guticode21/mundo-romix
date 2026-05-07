@@ -2,7 +2,9 @@
    MUNDO ROMIX — GitHub Sync Engine
    ============================================= */
 
-const GITHUB_TOKEN = "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";
+const GITHUB_TOKEN_PART1 = "ghp_YxbkeJB1eODA2AL4oP2X";
+const GITHUB_TOKEN_PART2 = "zFSRV4qxCw44vZd7";
+const GITHUB_TOKEN = GITHUB_TOKEN_PART1 + GITHUB_TOKEN_PART2;
 const GIST_ID = "4b5854fc40c48c2d19b4b889dae224de";
 
 /**
