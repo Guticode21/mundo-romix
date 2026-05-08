@@ -2,14 +2,8 @@
    MUNDO ROMIX — Telegram Remote Engine (Total Fix) 🤖
    ============================================= */
 
-// Reconstruimos el token pieza por pieza para evitar errores de caracteres
-const p1 = "8733347220";
-const p2 = ":";
-const p3 = "AAEaIqozrSgwg65";
-const p4 = "_"; // Guion bajo
-const p5 = "b360Zntqaw5YivOGuzg";
-
-const TG_TOKEN = (p1 + p2 + p3 + p4 + p5).trim();
+// No guardamos el token aquí para evitar que GitHub lo borre.
+const TG_TOKEN = localStorage.getItem('mr_tg_token') || "";
 const CHAT_ID = "1603507898";
 
 async function obtenerDatosTelegram() {
