@@ -123,58 +123,50 @@
 
   <script src="js/mensajes.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/mensajes.js"></script>
-  <script src="js/app.js"></script>
-  <script src="js/github-sync.js"></script>
+  <script src="js/sheets-sync.js"></script>
   <script>
     const usuario = protegerPagina('Fabi');
     if(usuario){
       document.getElementById('nombreUsuario').textContent = usuario;
       iniciarContador('contadorTiempo', new Date(2024, 8, 1));
 
-      // 1. Sincronizar mensaje y PDF desde GitHub
-      async function sincronizarNube() {
-        const datos = await obtenerDatosNube();
+      // 1. Sincronizar mensaje y PDF desde Google Sheets
+      async function sincronizarExcel() {
+        const datos = await obtenerDatosExcel();
         const msgTextoEl = document.getElementById('msgTexto');
         
         if (datos) {
-          // Guardar en localStorage para respaldo offline
           if(datos.mensaje) localStorage.setItem('mr_mensaje_admin', datos.mensaje);
           if(datos.pdfHitos) localStorage.setItem('mr_pdf_hitos', datos.pdfHitos);
           if(datos.fotos) localStorage.setItem('mr_galeria_fotos', datos.fotos);
           
-          // Actualizar UI
           msgTextoEl.textContent = datos.mensaje || obtenerMensajeDelDia().texto;
         } else {
-          // Fallback a mensajes automáticos si no hay internet o datos
           msgTextoEl.textContent = obtenerMensajeDelDia().texto;
         }
       }
-      sincronizarNube();
+      sincronizarExcel();
 
-      // 2. Renderizar Galería (GitHub + Locales)
-      window.renderGaleriaUniversal = async function() {
+      // 2. Renderizar Galería (Excel + Locales)
+      window.renderGaleriaExcel = async function() {
         const grid = document.getElementById('galeriaGrid');
         const hint = document.getElementById('galeriaHint');
         if(!grid) return;
         
         grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--oro);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando recuerdos...</div>';
 
-        const datos = await obtenerDatosNube();
-        grid.innerHTML = ''; // Limpiar spinner
+        const datos = await obtenerDatosExcel();
+        grid.innerHTML = ''; 
 
-        // A. FOTOS REGISTRADAS EN GITHUB (Nombres de archivos)
         let nombres = [];
         if(datos && datos.fotos && datos.fotos.trim() !== "") {
           nombres = datos.fotos.split(',').map(s => s.trim()).filter(s => s);
         } else {
-          // Si no hay en GitHub, usar las predefinidas (FOTOS_PREDEFINIDAS de app.js)
           nombres = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
         }
 
         nombres.forEach(nombre => {
           const img = document.createElement('img');
-          // Si empieza por http, es una URL externa, si no, es local en img/
           img.src = nombre.startsWith('http') ? nombre : 'img/' + nombre;
           img.loading = "lazy";
           img.onclick = () => abrirImagen(img.src, "Nuestro recuerdo 💖");
@@ -185,32 +177,27 @@
         if(hint) hint.style.display = 'none';
       };
 
-      // Evento del botón de fotos
       document.getElementById('cardFotos').onclick = () => {
         abrirModal('modalFotos');
-        renderGaleriaUniversal();
+        renderGaleriaExcel();
       };
 
-      // === PWA: Notificaciones ===
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js').then((reg) => {
           if (Notification.permission === 'default') Notification.requestPermission();
-          
           const verificarNotif = () => {
             const hoy = new Date().toDateString();
             if (localStorage.getItem('mr_ultima_notif') !== hoy && Notification.permission === 'granted') {
               const hora = new Date().getHours();
               if (hora >= 8 && hora < 22) {
                 localStorage.setItem('mr_ultima_notif', hoy);
-                const msg = obtenerMensajeDelDia().texto;
                 if (reg.active) {
-                  reg.active.postMessage({ tipo: 'notificar_ahora', titulo: '💖 Mundo Romix', cuerpo: msg.substring(0, 50) + '...' });
+                  reg.active.postMessage({ tipo: 'notificar_ahora', titulo: '💖 Mundo Romix', cuerpo: 'Tienes un nuevo mensaje...' });
                 }
               }
             }
           };
           verificarNotif();
-          setInterval(verificarNotif, 1000 * 60 * 60);
         });
       }
     }
