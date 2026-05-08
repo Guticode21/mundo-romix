@@ -106,17 +106,21 @@
       </div>
     </div>
 
-    <!-- SECCIÓN: PDF HITOS -->
-    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
-      <div class="admin-section-title"><i class="fa-solid fa-file-pdf"></i> ARCHIVO PDF DE HITOS</div>
-      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:14px;line-height:1.5">
-        Escribe el nombre del archivo (ej: <strong>hitos.pdf</strong>). Recuerda subir el archivo a tu repositorio de GitHub.
+    <!-- SECCIÓN: CONFIGURACIÓN TÉCNICA (SOLO TÚ) -->
+    <div class="glass-card fade-in" style="padding:22px;margin-top:16px; border: 1px solid var(--oro)">
+      <div class="admin-section-title"><i class="fa-solid fa-gear"></i> CONFIGURACIÓN DE CONEXIÓN</div>
+      <p style="font-size:.75rem;color:var(--vinotinto);margin-bottom:10px">
+        Pega aquí tu Token de GitHub (ghp_...) para activar la sincronización. Esto solo lo haces una vez.
       </p>
       <div class="input-group">
-        <i class="fa-solid fa-link"></i>
-        <input type="text" id="adminPdf" class="input-field" placeholder="hitos.pdf"/>
+        <i class="fa-solid fa-key"></i>
+        <input type="password" id="adminGhToken" class="input-field" placeholder="ghp_xxxxxxxxxxxx"/>
       </div>
+      <button class="btn btn-outline btn-full mt-10" onclick="guardarTokenManual()" style="font-size:0.8rem">
+        <i class="fa-solid fa-check"></i> Activar Conexión
+      </button>
     </div>
+
 
     <!-- BOTONES DE ACCIÓN -->
     <div class="fade-in" style="margin-top:20px">
@@ -144,8 +148,24 @@
     const usuario = protegerPagina('Guti');
     
     if(usuario){
+      // Cargar Token local si existe
+      document.getElementById('adminGhToken').value = localStorage.getItem('mr_gh_token') || '';
+
+      // No guardamos el token aquí para evitar que GitHub lo borre.
+      // El usuario lo introducirá en el panel admin y se guardará en localStorage.
+      let GITHUB_TOKEN = localStorage.getItem('mr_gh_token') || "";
+      const GIST_ID = "4b5854fc40c48c2d19b4b889dae224de";
+
+      window.guardarTokenManual = function() {
+        const tok = document.getElementById('adminGhToken').value.trim();
+        if(!tok.startsWith('ghp_')) return alert('El token debe empezar por ghp_');
+        localStorage.setItem('mr_gh_token', tok);
+        location.reload(); // Recargar para aplicar
+      };
+
       // 1. Cargar datos desde GitHub al abrir
       async function cargarDatos() {
+        if(!localStorage.getItem('mr_gh_token')) return;
         const datos = await obtenerDatosNube();
         if (datos) {
           document.getElementById('adminMensaje').value = datos.mensaje || '';

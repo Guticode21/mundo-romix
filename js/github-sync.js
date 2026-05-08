@@ -2,9 +2,9 @@
    MUNDO ROMIX — GitHub Sync Engine (Secure)
    ============================================= */
 
-// Token cifrado para que GitHub no lo desactive
-const _K = "Z2hwX29RaThTRnd0N0JLZ29WSVFLWU1SOFFKSHVsaENqVzE5ZHV2Qw==";
-const GITHUB_TOKEN = atob(_K);
+// No guardamos el token aquí para evitar que GitHub lo borre.
+// El usuario lo introducirá en el panel admin y se guardará en localStorage.
+let GITHUB_TOKEN = localStorage.getItem('mr_gh_token') || "";
 const GIST_ID = "4b5854fc40c48c2d19b4b889dae224de";
 
 /**
