@@ -1,5 +1,5 @@
 /* =============================================
-   MUNDO ROMIX — Telegram Remote Engine 🤖
+   MUNDO ROMIX — Telegram Remote Engine (Debug Mode) 🤖
    ============================================= */
 
 const _T = "ODczMzM0NzIyMDpBQUVhSXBvenJTZ3dnNjVfYjM2MFpudHFhdzVZaXZPR3V6Zw==";
@@ -11,27 +11,37 @@ const CHAT_ID = "1603507898";
  */
 async function obtenerDatosTelegram() {
   try {
-    // Corregido: Llamada directa a la API de Telegram
-    const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getUpdates?offset=-1`);
+    console.log("Intentando conectar con Telegram...");
+    const res = await fetch(`https://api.telegram.org/bot${TG_TOKEN}/getUpdates?limit=10&offset=-1`);
     const data = await res.json();
 
-    if (data.ok && data.result && data.result.length > 0) {
-      const lastUpdate = data.result[0];
-      const msg = lastUpdate.message || lastUpdate.edited_message;
-      
-      // Verificamos que el mensaje venga de tu CHAT_ID
-      if (msg && msg.chat.id.toString() === CHAT_ID) {
-        return {
-          texto: msg.text || "¡Te amo! 💖",
-          fecha: msg.date,
-          id: msg.message_id
-        };
-      }
+    if (!data.ok) {
+      console.error("Error en la respuesta de Telegram:", data.description);
+      return { error: "Error de API: " + data.description };
     }
-    return null;
+
+    if (data.result && data.result.length > 0) {
+      // Buscamos el último mensaje que sea tuyo
+      for (let i = data.result.length - 1; i >= 0; i--) {
+        const update = data.result[i];
+        const msg = update.message || update.edited_message;
+        
+        if (msg && msg.chat.id.toString() === CHAT_ID) {
+          console.log("Mensaje encontrado:", msg.text);
+          return {
+            texto: msg.text || "",
+            fecha: msg.date,
+            id: msg.message_id
+          };
+        }
+      }
+      return { error: "No se encontró ningún mensaje de tu Chat ID (" + CHAT_ID + "). ¡Escríbele al bot!" };
+    }
+    
+    return { error: "El bot no tiene mensajes nuevos. ¡Escríbele algo!" };
   } catch (error) {
-    console.error("Error leyendo Telegram:", error);
-    return null;
+    console.error("Error de conexión:", error);
+    return { error: "Error de conexión: No se pudo contactar con Telegram." };
   }
 }
 
@@ -39,36 +49,31 @@ async function obtenerDatosTelegram() {
  * Lógica para manejar notificaciones y actualizaciones
  */
 async function procesarSincronizacionTelegram() {
-  const datos = await obtenerDatosTelegram();
   const msgTextoEl = document.getElementById('msgTexto');
+  const res = await obtenerDatosTelegram();
   
-  if (!datos) {
-      // Si falla, mostramos el mensaje por defecto del día para que no se quede cargando
+  if (res.error) {
+      console.warn(res.error);
+      // Si hay error y estamos cargando, mostramos el mensaje por defecto del día
       if(msgTextoEl && msgTextoEl.textContent.includes('Cargando')) {
-          msgTextoEl.textContent = typeof obtenerMensajeDelDia === 'function' ? obtenerMensajeDelDia().texto : "Esperando mensaje... 💖";
+          msgTextoEl.textContent = typeof obtenerMensajeDelDia === 'function' ? obtenerMensajeDelDia().texto : "Bienvenida, mi amor 💖";
       }
       return;
   }
 
   const lastId = localStorage.getItem('mr_last_tg_id');
   
-  if (datos.id.toString() !== lastId) {
-    localStorage.setItem('mr_last_tg_id', datos.id);
-    localStorage.setItem('mr_mensaje_admin', datos.texto);
-    
-    if(msgTextoEl) msgTextoEl.textContent = datos.texto;
+  if (res.id.toString() !== lastId) {
+    localStorage.setItem('mr_last_tg_id', res.id);
+    localStorage.setItem('mr_mensaje_admin', res.texto);
+    if(msgTextoEl) msgTextoEl.textContent = res.texto;
 
-    // Notificación visual
     if ("Notification" in window && Notification.permission === "granted") {
-       new Notification("💖 Mundo Romix", {
-         body: "Tienes un nuevo mensaje de Guti...",
-         icon: "img/logo.png"
-       });
+       new Notification("💖 Mundo Romix", { body: "Tienes un nuevo mensaje de Guti..." });
     }
   } else {
-    // Si el ID es el mismo, pero sigue saliendo "Cargando", ponemos el texto guardado
     if(msgTextoEl && msgTextoEl.textContent.includes('Cargando')) {
-        msgTextoEl.textContent = datos.texto;
+        msgTextoEl.textContent = res.texto;
     }
   }
 }
