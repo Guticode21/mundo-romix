@@ -123,51 +123,31 @@
 
   <script src="js/mensajes.js"></script>
   <script src="js/app.js"></script>
-  <script src="js/sheets-sync.js"></script>
+  <script src="js/telegram-sync.js"></script>
   <script>
     const usuario = protegerPagina('Fabi');
     if(usuario){
       document.getElementById('nombreUsuario').textContent = usuario;
       iniciarContador('contadorTiempo', new Date(2024, 8, 1));
 
-      // 1. Sincronizar mensaje y PDF desde Google Sheets
-      async function sincronizarExcel() {
-        const datos = await obtenerDatosExcel();
-        const msgTextoEl = document.getElementById('msgTexto');
-        
-        if (datos) {
-          if(datos.mensaje) localStorage.setItem('mr_mensaje_admin', datos.mensaje);
-          if(datos.pdfHitos) localStorage.setItem('mr_pdf_hitos', datos.pdfHitos);
-          if(datos.fotos) localStorage.setItem('mr_galeria_fotos', datos.fotos);
-          
-          msgTextoEl.textContent = datos.mensaje || obtenerMensajeDelDia().texto;
-        } else {
-          msgTextoEl.textContent = obtenerMensajeDelDia().texto;
-        }
-      }
-      sincronizarExcel();
+      // 1. Sincronización Inicial
+      procesarSincronizacionTelegram();
 
-      // 2. Renderizar Galería (Excel + Locales)
-      window.renderGaleriaExcel = async function() {
+      // 2. Vigilancia Automática (cada 60 segundos)
+      setInterval(procesarSincronizacionTelegram, 60000);
+
+      // 3. Renderizar Galería (Mantenemos las fotos locales por ahora)
+      window.renderGaleriaTelegram = function() {
         const grid = document.getElementById('galeriaGrid');
         const hint = document.getElementById('galeriaHint');
         if(!grid) return;
         
-        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--oro);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando recuerdos...</div>';
-
-        const datos = await obtenerDatosExcel();
         grid.innerHTML = ''; 
-
-        let nombres = [];
-        if(datos && datos.fotos && datos.fotos.trim() !== "") {
-          nombres = datos.fotos.split(',').map(s => s.trim()).filter(s => s);
-        } else {
-          nombres = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
-        }
+        let nombres = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
 
         nombres.forEach(nombre => {
           const img = document.createElement('img');
-          img.src = nombre.startsWith('http') ? nombre : 'img/' + nombre;
+          img.src = 'img/' + nombre;
           img.loading = "lazy";
           img.onclick = () => abrirImagen(img.src, "Nuestro recuerdo 💖");
           img.onerror = () => img.remove();
@@ -179,26 +159,12 @@
 
       document.getElementById('cardFotos').onclick = () => {
         abrirModal('modalFotos');
-        renderGaleriaExcel();
+        renderGaleriaTelegram();
       };
 
+      // Registro de Service Worker para PWA
       if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js').then((reg) => {
-          if (Notification.permission === 'default') Notification.requestPermission();
-          const verificarNotif = () => {
-            const hoy = new Date().toDateString();
-            if (localStorage.getItem('mr_ultima_notif') !== hoy && Notification.permission === 'granted') {
-              const hora = new Date().getHours();
-              if (hora >= 8 && hora < 22) {
-                localStorage.setItem('mr_ultima_notif', hoy);
-                if (reg.active) {
-                  reg.active.postMessage({ tipo: 'notificar_ahora', titulo: '💖 Mundo Romix', cuerpo: 'Tienes un nuevo mensaje...' });
-                }
-              }
-            }
-          };
-          verificarNotif();
-        });
+        navigator.serviceWorker.register('./sw.js');
       }
     }
   </script>
