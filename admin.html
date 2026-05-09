@@ -1,176 +1,95 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Mundo Romix — Admin</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#5e0b15" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Mundo Romix" />
-  <link rel="apple-touch-icon" href="img/logo.png" />
-  <meta name="description" content="Panel de administración de Mundo Romix."/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="css/estilos.css"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mundo Romix - Panel de Control 👑</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
-    .admin-hero{text-align:center;padding:28px 20px 10px}
-    .admin-hero h2{font-size:1.5rem;font-weight:800;color:var(--vinotinto);margin-bottom:4px}
-    .admin-hero p{font-size:.85rem;color:var(--oro);font-weight:600}
-    .admin-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--vinotinto),#8b1a2a);display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 4px 20px rgba(94,11,21,.3)}
-    .admin-avatar i{font-size:2rem;color:#fff}
-    .preview-box{background:rgba(255,255,255,.35);border-radius:var(--radius-sm);padding:14px;margin-top:12px;font-size:.9rem;font-style:italic;color:var(--vinotinto);border:1px dashed var(--cristal-borde);min-height:50px}
-    .current-value{font-size:.8rem;color:var(--oro);font-weight:600;margin-top:8px;display:flex;align-items:center;gap:6px}
+    body { background: var(--crema); color: var(--vinotinto); }
+    .admin-container { max-width: 500px; margin: 0 auto; padding: 20px; }
+    .admin-header { text-align: center; margin-bottom: 30px; }
+    .admin-section-title { font-weight: 700; color: var(--vinotinto); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 1.1rem; }
+    .input-group { background: white; border: 1px solid var(--oro); border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+    .input-field { border: none; outline: none; width: 100%; font-size: 1rem; color: var(--vinotinto); }
+    .btn-full { width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+    .btn-save { background: var(--vinotinto); color: white; border: none; }
+    .btn-save:hover { background: #5e0b15; transform: translateY(-2px); }
+    .chat-container { height: 250px; overflow-y: auto; background: rgba(0,0,0,0.05); border-radius: 12px; padding: 15px; display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--oro); }
+    .msg { padding: 10px 15px; border-radius: 18px; max-width: 85%; font-size: 0.9rem; line-height: 1.4; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+    .msg-guti { align-self: flex-end; background: var(--vinotinto); color: white; border-bottom-right-radius: 4px; }
+    .msg-fabi { align-self: flex-start; background: white; color: var(--vinotinto); border-bottom-left-radius: 4px; border: 1px solid var(--oro); }
   </style>
 </head>
 <body>
 
-  <!-- TOPBAR -->
-  <header class="topbar">
-    <span class="topbar-title">
-      <img src="img/logo.png" alt="Logo" style="width: 30px; height: 30px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
-      Admin Panel
-    </span>
-    <button class="topbar-btn" onclick="cerrarSesion()" title="Cerrar sesión" id="btnLogout">
-      <i class="fa-solid fa-right-from-bracket"></i>
+  <div class="admin-container">
+    <div class="admin-header">
+      <h1 style="color:var(--vinotinto); font-family:'Outfit', sans-serif">Hola, Guti 👑</h1>
+      <p style="color:var(--oro); font-weight:600">Control Central de Mundo Romix</p>
+    </div>
+
+    <!-- CONFIGURACIÓN DE CONTENIDO -->
+    <div class="glass-card fade-in" style="padding:22px; margin-bottom:20px;">
+      <div class="admin-section-title"><i class="fa-solid fa-heart"></i> MENSAJE DEL DÍA</div>
+      <textarea id="adminMensaje" class="input-field" placeholder="Escribe tu mensaje de amor aquí..." style="height:80px; background:rgba(0,0,0,0.03); padding:10px; border-radius:8px; border:1px solid var(--oro); margin-bottom:15px; width:100%; font-family:inherit;"></textarea>
+
+      <div class="admin-section-title"><i class="fa-solid fa-file-pdf"></i> ENLACE HITOS (PDF)</div>
+      <div class="input-group">
+        <i class="fa-solid fa-link"></i>
+        <input type="text" id="adminPdf" class="input-field" placeholder="Pega el link del PDF aquí...">
+      </div>
+
+      <div class="admin-section-title"><i class="fa-solid fa-images"></i> GALERÍA (LINKS)</div>
+      <div class="input-group">
+        <i class="fa-solid fa-camera"></i>
+        <input type="text" id="adminFotos" class="input-field" placeholder="Link1, Link2, Link3...">
+      </div>
+
+      <button class="btn btn-save btn-full" onclick="guardarCambios()">
+        <i class="fa-solid fa-cloud-arrow-up"></i> ACTUALIZAR TODO
+      </button>
+    </div>
+
+    <!-- CHAT EN TIEMPO REAL -->
+    <div class="glass-card fade-in" style="padding:22px;">
+      <div class="admin-section-title"><i class="fa-solid fa-comments"></i> CHAT CON FABI</div>
+      <div id="chatContainer" class="chat-container"></div>
+      <div style="display:flex; gap:8px; margin-top:15px;">
+        <input type="text" id="chatInput" class="input-field" placeholder="Dile algo lindo..." style="background:white; border:1px solid var(--oro); border-radius:25px; padding:12px 20px" onkeypress="if(event.key==='Enter') mandarMensaje()">
+        <button class="btn-save" onclick="mandarMensaje()" style="width:50px; height:50px; border-radius:50%; border:none; cursor:pointer">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+
+    <button class="btn btn-outline btn-full mt-16" onclick="cerrarSesion()" style="border:1px solid var(--vinotinto); background:none; color:var(--vinotinto)">
+      <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
     </button>
-  </header>
-
-  <div class="page-container">
-
-    <!-- HERO -->
-    <div class="admin-hero fade-in">
-      <div class="admin-avatar"><i class="fa-solid fa-crown"></i></div>
-      <h2>Hola, Guti 👑</h2>
-      <p>Controla lo que Fabi ve en su dashboard</p>
-    </div>
-
-    <!-- ALERTA -->
-    <div id="adminAlerta" class="alert alert-success hidden" style="margin-top:16px">
-      ✅ Guardado correctamente
-    </div>
-
-    <!-- SECCIÓN: ESTADO ACTUAL -->
-    <div class="glass-card fade-in" style="padding:22px;margin-top:20px">
-      <div class="admin-section-title"><i class="fa-solid fa-chart-simple"></i> ESTADO ACTUAL</div>
-
-      <div class="stat-item">
-        <div class="stat-icon"><i class="fa-solid fa-file-pdf"></i></div>
-        <div class="stat-text">
-          <div class="stat-label">PDF DE HITOS</div>
-          <div class="stat-valor" id="statPdf">Sin configurar</div>
-        </div>
-      </div>
-
-      <div class="stat-item">
-        <div class="stat-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
-        <div class="stat-text">
-          <div class="stat-label">MENSAJE PERSONALIZADO</div>
-          <div class="stat-valor" id="statMsg">No activo</div>
-        </div>
-      </div>
-
-      <div class="stat-item">
-        <div class="stat-icon"><i class="fa-solid fa-images"></i></div>
-        <div class="stat-text">
-          <div class="stat-label">FOTOS EN GALERÍA</div>
-          <div class="stat-valor" id="statFotos">0 fotos</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SECCIÓN: MENSAJE PERSONALIZADO -->
-    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
-      <div class="admin-section-title"><i class="fa-solid fa-pen-fancy"></i> MENSAJE PARA FABI</div>
-      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:14px;line-height:1.5">
-        Este mensaje se guardará en tu GitHub y aparecerá en el móvil de Fabi automáticamente.
-      </p>
-      <div class="input-group">
-        <i class="fa-solid fa-heart"></i>
-        <textarea id="adminMensaje" class="input-field" placeholder="Escribe algo especial para Fabi..." rows="4"></textarea>
-      </div>
-      <div class="preview-box" id="previewMsg">Vista previa del mensaje...</div>
-    </div>
-
-    <!-- SECCIÓN: GALERÍA DE FOTOS -->
-    <div class="glass-card fade-in" style="padding:22px;margin-top:16px">
-      <div class="admin-section-title"><i class="fa-solid fa-camera-retro"></i> GALERÍA DE FOTOS</div>
-      <p style="font-size:.85rem;color:var(--vinotinto);margin-bottom:8px;line-height:1.5">
-        Escribe los nombres de las fotos (ej: 1.jpg, 2.jpg) separados por coma.
-      </p>
-      <div class="input-group" style="align-items:flex-start">
-        <i class="fa-solid fa-images" style="top:18px"></i>
-        <textarea id="adminFotos" class="input-field" placeholder="1.jpg, 2.jpg, viaje.png..." rows="3"></textarea>
-      </div>
-    </div>
-
-    <!-- SECCIÓN: CONFIGURACIÓN TÉCNICA (SOLO TÚ) -->
-    <div class="glass-card fade-in" style="padding:22px;margin-top:16px; border: 1px solid var(--oro)">
-      <div class="admin-section-title"><i class="fa-solid fa-robot"></i> CONEXIÓN TELEGRAM</div>
-      <p style="font-size:.75rem;color:var(--vinotinto);margin-bottom:10px">
-        Pega aquí tu Token de Telegram (ej: 873334...:AAEa...) para activar el control remoto.
-      </p>
-      <div class="input-group">
-        <i class="fa-solid fa-key"></i>
-        <input type="password" id="adminTgToken" class="input-field" placeholder="0000000000:ABCDefgh..."/>
-      </div>
-      <button class="btn btn-outline btn-full mt-10" onclick="guardarTokenTelegram()" style="font-size:0.8rem">
-        <i class="fa-solid fa-check"></i> Activar Telegram
-      </button>
-    </div>
-
-
-    <!-- BOTONES DE ACCIÓN -->
-    <div class="fade-in" style="margin-top:20px">
-      <button class="btn btn-primary btn-full" onclick="guardarConfigAdmin()" id="btnGuardar">
-        <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
-      </button>
-      <button class="btn btn-outline btn-full mt-16" onclick="limpiarMensajeAdmin()" id="btnLimpiar">
-        <i class="fa-solid fa-broom"></i> Limpiar Mensaje
-      </button>
-    </div>
-
-    <!-- ACCESO RÁPIDO -->
-    <div class="glass-card fade-in" style="padding:18px;margin-top:20px;text-align:center">
-      <div class="admin-section-title" style="justify-content:center"><i class="fa-solid fa-eye"></i> VISTA RÁPIDA</div>
-      <a href="dashboard.html" class="btn btn-gold" style="margin-top:8px" onclick="localStorage.setItem('mr_usuario','Fabi')">
-        <i class="fa-solid fa-eye"></i> Ver como Fabi
-      </a>
-    </div>
-
   </div>
-
-  <script src="js/app.js"></script>
-  <script src="js/github-sync.js"></script>
-  <!-- SECCIÓN: CHAT PRIVADO -->
-  <div class="glass-card fade-in" style="margin-top:20px; padding:20px;">
-    <div class="admin-section-title"><i class="fa-solid fa-comments"></i> CHAT CON FABI</div>
-    <div id="chatContainer" class="chat-container" style="height:250px; overflow-y:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:8px;"></div>
-    <div style="display:flex; gap:8px; margin-top:10px;">
-      <input type="text" id="chatInput" class="input-field" placeholder="Dile algo lindo..." style="margin:0" onkeypress="if(event.key==='Enter') mandarMensaje()">
-      <button class="btn btn-outline" onclick="mandarMensaje()" style="padding:10px 20px"><i class="fa-solid fa-paper-plane"></i></button>
-    </div>
-  </div>
-
-  <style>
-    .chat-container { scroll-behavior: smooth; }
-    .msg { padding: 8px 14px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
-    .msg-guti { align-self: flex-end; background: var(--vinotinto); color: white; border-bottom-right-radius: 4px; }
-    .msg-fabi { align-self: flex-start; background: var(--oro); color: var(--vinotinto); border-bottom-left-radius: 4px; }
-  </style>
 
   <!-- SCRIPTS DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="js/app.js"></script>
   <script src="js/firebase-config.js"></script>
 
   <script>
     const usuarioActual = protegerPagina('Guti');
     
     if(usuarioActual){
-      // 1. CHAT EN TIEMPO REAL
+      // 1. CARGAR CONFIGURACIÓN DESDE FIREBASE
+      db.ref('config').on('value', (snapshot) => {
+        const datos = snapshot.val();
+        if(datos){
+          document.getElementById('adminMensaje').value = datos.mensaje || '';
+          document.getElementById('adminPdf').value = datos.pdfUrl || '';
+          document.getElementById('adminFotos').value = datos.fotos || '';
+        }
+      });
+
+      // 2. CHAT EN TIEMPO REAL
       db.ref('chat').limitToLast(20).on('value', (snapshot) => {
         const container = document.getElementById('chatContainer');
         container.innerHTML = '';
@@ -192,89 +111,19 @@
         }
       };
 
-      // 2. CARGAR Y GUARDAR CONFIGURACIÓN
-      db.ref('config').on('value', (snapshot) => {
-        const datos = snapshot.val();
-        if(datos){
-          document.getElementById('adminMensaje').value = datos.mensaje || '';
-          document.getElementById('adminPdf').value = datos.pdfUrl || '';
-          document.getElementById('adminFotos').value = datos.fotos || '';
-        }
-      });
-
       window.guardarCambios = function() {
         const mensaje = document.getElementById('adminMensaje').value.trim();
         const pdfUrl = document.getElementById('adminPdf').value.trim();
         const fotos = document.getElementById('adminFotos').value.trim();
         
         actualizarConfig({ mensaje, pdfUrl, fotos });
-        alert('✅ ¡Cambios guardados y actualizados en el móvil de Fabi!');
+        alert('✅ ¡Mundo Romix actualizado!');
       };
 
       window.cerrarSesion = function() {
         localStorage.removeItem('mr_usuario');
         window.location.href = 'index.html';
       };
-      
-      // Cargar Token local si existe
-      document.getElementById('adminTgToken').value = localStorage.getItem('mr_tg_token') || '';
-
-      window.guardarTokenTelegram = function() {
-        const tok = document.getElementById('adminTgToken').value.trim();
-        if(!tok.includes(':')) return alert('Token no válido');
-        localStorage.setItem('mr_tg_token', tok);
-        alert('✅ Token de Telegram guardado localmente');
-        location.reload(); 
-      };
-
-      // 1. Cargar datos desde Telegram al abrir
-      async function cargarDatos() {
-        if(!localStorage.getItem('mr_tg_token')) return;
-        procesarSincronizacionTelegram();
-      }
-
-      // 2. Guardar cambios en GitHub
-      window.guardarConfigAdmin = async function() {
-        const btn = document.getElementById('btnGuardar');
-        const originalText = btn.innerHTML;
-        
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Sincronizando...';
-
-        const msg = document.getElementById('adminMensaje').value;
-        const pdf = document.getElementById('adminPdf').value;
-        const fotos = document.getElementById('adminFotos').value;
-        
-        const exito = await guardarDatosNube({
-          mensaje: msg,
-          pdfHitos: pdf,
-          fotos: fotos
-        });
-
-        if (exito) {
-          mostrarAlertaAdmin('✅ ¡Sincronizado con éxito en GitHub!');
-          cargarDatos();
-        } else {
-          alert('Error al sincronizar. Revisa tu conexión.');
-        }
-        
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      };
-
-      // Limpiar mensaje
-      window.limpiarMensajeAdmin = async function() {
-        if(confirm('¿Seguro que quieres borrar el mensaje?')) {
-          await guardarDatosNube({ mensaje: '' });
-          cargarDatos();
-          mostrarAlertaAdmin('🧹 Mensaje borrado');
-        }
-      };
-
-      // Preview en vivo del mensaje
-      document.getElementById('adminMensaje').addEventListener('input', function(){
-        document.getElementById('previewMsg').textContent = this.value || 'Vista previa del mensaje...';
-      });
     }
   </script>
 </body>
