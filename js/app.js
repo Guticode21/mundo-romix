@@ -83,8 +83,8 @@ function obtenerMensajeDelDia() {
     return { tipo: 'admin', texto: msgAdmin };
   }
 
-  // 2. Aniversario: 11 de mayo (mes 4)
-  if (dia === 11 && mes === 4) {
+  // 2. Aniversario: 1 de septiembre (día 1, mes 8)
+  if (dia === 1 && mes === 8) {
     return { tipo: 'aniversario', texto: MENSAJE_ANIVERSARIO };
   }
 
