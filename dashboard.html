@@ -180,6 +180,9 @@
           if(datos.mensaje) document.getElementById('msgTexto').textContent = datos.mensaje;
           if(datos.pdfUrl) localStorage.setItem('mr_pdf_hitos_url', datos.pdfUrl);
           if(datos.fotos) localStorage.setItem('mr_fotos_cloud', datos.fotos);
+        } else {
+          // Si está vacío, ponemos algo bonito por defecto
+          document.getElementById('msgTexto').textContent = "Esperando el mensaje de amor de Guti... 💖";
         }
       });
 
