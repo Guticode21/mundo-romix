@@ -54,7 +54,12 @@
 
     <!-- CHAT EN TIEMPO REAL -->
     <div class="glass-card fade-in" style="padding:22px;">
-      <div class="admin-section-title"><i class="fa-solid fa-comments"></i> CHAT CON FABI</div>
+      <div class="admin-section-title" style="justify-content:space-between">
+        <span><i class="fa-solid fa-comments"></i> CHAT CON FABI</span>
+        <button onclick="borrarChat()" style="background:none; border:none; color:var(--oro); cursor:pointer; font-size:0.75rem; text-decoration:underline">
+          <i class="fa-solid fa-trash-can"></i> Limpiar historial
+        </button>
+      </div>
       <div id="chatContainer" class="chat-container"></div>
       <div style="display:flex; gap:8px; margin-top:15px;">
         <input type="text" id="chatInput" class="input-field" placeholder="Dile algo lindo..." style="background:white; border:1px solid var(--oro); border-radius:25px; padding:12px 20px" onkeypress="if(event.key==='Enter') mandarMensaje()">
@@ -108,6 +113,12 @@
         if(input.value.trim()){
           enviarChat('Guti', input.value);
           input.value = '';
+        }
+      };
+
+      window.borrarChat = () => {
+        if(confirm('¿Seguro que quieres borrar todo el historial del chat?')) {
+          db.ref('chat').remove();
         }
       };
 
