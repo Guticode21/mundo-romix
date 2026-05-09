@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -49,10 +50,23 @@
     }
 
     @keyframes floatHeart {
-      0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
-      10%  { opacity: 0.12; }
-      90%  { opacity: 0.12; }
-      100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+      0% {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.12;
+      }
+
+      90% {
+        opacity: 0.12;
+      }
+
+      100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+      }
     }
 
     .login-footer {
@@ -62,7 +76,9 @@
       color: rgba(94, 11, 21, 0.5);
     }
 
-    .login-footer i { color: var(--oro); }
+    .login-footer i {
+      color: var(--oro);
+    }
 
     .toggle-pass {
       position: absolute;
@@ -78,6 +94,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <!-- Corazones flotantes decorativos -->
@@ -89,7 +106,8 @@
       <!-- Logo / Marca -->
       <div class="logo-marca">
         <span class="logo-icono">
-          <img src="img/logo.png" alt="Logo Mundo Romix" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; box-shadow: var(--sombra);">
+          <img src="img/logo.png" alt="Logo Mundo Romix"
+            style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; box-shadow: var(--sombra);">
         </span>
         <h1>Mundo Romix</h1>
         <p>Nuestro espacio, nuestra historia 💫</p>
@@ -106,26 +124,14 @@
 
         <div class="input-group">
           <i class="fa-solid fa-user"></i>
-          <input
-            type="text"
-            id="usuario"
-            class="input-field"
-            placeholder="Tu nombre..."
-            autocomplete="username"
-            required
-          />
+          <input type="text" id="usuario" class="input-field" placeholder="Tu nombre..." autocomplete="username"
+            required />
         </div>
 
         <div class="input-group">
           <i class="fa-solid fa-lock"></i>
-          <input
-            type="password"
-            id="password"
-            class="input-field"
-            placeholder="Contraseña..."
-            autocomplete="current-password"
-            required
-          />
+          <input type="password" id="password" class="input-field" placeholder="Contraseña..."
+            autocomplete="current-password" required />
           <button type="button" class="toggle-pass" id="togglePass" aria-label="Mostrar/ocultar contraseña">
             <i class="fa-solid fa-eye" id="togglePassIcon"></i>
           </button>
@@ -175,7 +181,7 @@
     // === TOGGLE CONTRASEÑA ===
     document.getElementById('togglePass').addEventListener('click', function () {
       const input = document.getElementById('password');
-      const icon  = document.getElementById('togglePassIcon');
+      const icon = document.getElementById('togglePassIcon');
       if (input.type === 'password') {
         input.type = 'text';
         icon.className = 'fa-solid fa-eye-slash';
@@ -190,16 +196,16 @@
       e.preventDefault();
 
       const usuario = document.getElementById('usuario').value.trim();
-      const pass    = document.getElementById('password').value.trim();
+      const pass = document.getElementById('password').value.trim();
       const errorEl = document.getElementById('loginError');
-      const btn     = document.getElementById('btnLogin');
+      const btn = document.getElementById('btnLogin');
 
       errorEl.classList.add('hidden');
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
       setTimeout(() => {
-        if (usuario === 'Fabi' && pass === 'amor123') {
+        if (usuario === 'Fabi' && pass === 'romix21') {
           localStorage.setItem('mr_usuario', 'Fabi');
           window.location.href = 'dashboard.html';
         } else if (usuario === 'Guti' && pass === 'admin123') {
@@ -216,4 +222,5 @@
     });
   </script>
 </body>
+
 </html>
