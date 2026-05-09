@@ -70,10 +70,9 @@ async function sincronizarConIssue() {
     // Actualizar Mensaje
     if(msgTextoEl) msgTextoEl.textContent = datos.mensaje;
 
-    // Actualizar Botón PDF (Si existe el botón de hitos)
-    const btnPdf = document.getElementById('btnVerPdf'); 
-    if(btnPdf && datos.pdfUrl) {
-        btnPdf.onclick = () => window.open(datos.pdfUrl, '_blank');
+    // Guardar el enlace del PDF para el botón del dashboard
+    if(datos.pdfUrl) {
+        localStorage.setItem('mr_pdf_hitos_url', datos.pdfUrl);
     }
 
     // Notificación si hay cambios
