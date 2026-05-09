@@ -176,13 +176,14 @@
       // === 1. SINCRONIZACIÓN DE DATOS (CONFIG) ===
       db.ref('config').on('value', (snapshot) => {
         const datos = snapshot.val();
-        if (datos) {
-          if(datos.mensaje) document.getElementById('msgTexto').textContent = datos.mensaje;
+        if (datos && datos.mensaje && datos.mensaje.trim() !== "") {
+          document.getElementById('msgTexto').textContent = datos.mensaje;
           if(datos.pdfUrl) localStorage.setItem('mr_pdf_hitos_url', datos.pdfUrl);
           if(datos.fotos) localStorage.setItem('mr_fotos_cloud', datos.fotos);
         } else {
-          // Si está vacío, ponemos algo bonito por defecto
-          document.getElementById('msgTexto').textContent = "Esperando el mensaje de amor de Guti... 💖";
+          // Si está vacío, usamos los mensajes aleatorios de mensajes.js
+          const fraseAleatoria = typeof obtenerMensajeDelDia === 'function' ? obtenerMensajeDelDia().texto : "¡Te amo más que ayer! 💖";
+          document.getElementById('msgTexto').textContent = fraseAleatoria;
         }
       });
 
