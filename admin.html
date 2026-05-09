@@ -144,10 +144,78 @@
 
   <script src="js/app.js"></script>
   <script src="js/github-sync.js"></script>
+  <!-- SECCIÓN: CHAT PRIVADO -->
+  <div class="glass-card fade-in" style="margin-top:20px; padding:20px;">
+    <div class="admin-section-title"><i class="fa-solid fa-comments"></i> CHAT CON FABI</div>
+    <div id="chatContainer" class="chat-container" style="height:250px; overflow-y:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:10px; display:flex; flex-direction:column; gap:8px;"></div>
+    <div style="display:flex; gap:8px; margin-top:10px;">
+      <input type="text" id="chatInput" class="input-field" placeholder="Dile algo lindo..." style="margin:0" onkeypress="if(event.key==='Enter') mandarMensaje()">
+      <button class="btn btn-outline" onclick="mandarMensaje()" style="padding:10px 20px"><i class="fa-solid fa-paper-plane"></i></button>
+    </div>
+  </div>
+
+  <style>
+    .chat-container { scroll-behavior: smooth; }
+    .msg { padding: 8px 14px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; }
+    .msg-guti { align-self: flex-end; background: var(--vinotinto); color: white; border-bottom-right-radius: 4px; }
+    .msg-fabi { align-self: flex-start; background: var(--oro); color: var(--vinotinto); border-bottom-left-radius: 4px; }
+  </style>
+
+  <!-- SCRIPTS DE FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+
   <script>
-    const usuario = protegerPagina('Guti');
+    const usuarioActual = protegerPagina('Guti');
     
-    if(usuario){
+    if(usuarioActual){
+      // 1. CHAT EN TIEMPO REAL
+      db.ref('chat').limitToLast(20).on('value', (snapshot) => {
+        const container = document.getElementById('chatContainer');
+        container.innerHTML = '';
+        snapshot.forEach((child) => {
+          const msg = child.val();
+          const div = document.createElement('div');
+          div.className = `msg msg-${msg.usuario.toLowerCase()}`;
+          div.textContent = msg.texto;
+          container.appendChild(div);
+        });
+        container.scrollTop = container.scrollHeight;
+      });
+
+      window.mandarMensaje = () => {
+        const input = document.getElementById('chatInput');
+        if(input.value.trim()){
+          enviarChat('Guti', input.value);
+          input.value = '';
+        }
+      };
+
+      // 2. CARGAR Y GUARDAR CONFIGURACIÓN
+      db.ref('config').on('value', (snapshot) => {
+        const datos = snapshot.val();
+        if(datos){
+          document.getElementById('adminMensaje').value = datos.mensaje || '';
+          document.getElementById('adminPdf').value = datos.pdfUrl || '';
+          document.getElementById('adminFotos').value = datos.fotos || '';
+        }
+      });
+
+      window.guardarCambios = function() {
+        const mensaje = document.getElementById('adminMensaje').value.trim();
+        const pdfUrl = document.getElementById('adminPdf').value.trim();
+        const fotos = document.getElementById('adminFotos').value.trim();
+        
+        actualizarConfig({ mensaje, pdfUrl, fotos });
+        alert('✅ ¡Cambios guardados y actualizados en el móvil de Fabi!');
+      };
+
+      window.cerrarSesion = function() {
+        localStorage.removeItem('mr_usuario');
+        window.location.href = 'index.html';
+      };
+      
       // Cargar Token local si existe
       document.getElementById('adminTgToken').value = localStorage.getItem('mr_tg_token') || '';
 
@@ -164,20 +232,6 @@
         if(!localStorage.getItem('mr_tg_token')) return;
         procesarSincronizacionTelegram();
       }
-        if (datos) {
-          document.getElementById('adminMensaje').value = datos.mensaje || '';
-          document.getElementById('adminPdf').value = datos.pdfHitos || '';
-          document.getElementById('adminFotos').value = datos.fotos || '';
-          
-          document.getElementById('statPdf').textContent = datos.pdfHitos || 'Sin configurar';
-          document.getElementById('statMsg').textContent = datos.mensaje ? 'Activo ✅' : 'No activo';
-          document.getElementById('previewMsg').textContent = datos.mensaje || 'Vista previa del mensaje...';
-          
-          const numFotos = (datos.fotos || '').split(',').filter(f => f.trim()).length;
-          document.getElementById('statFotos').textContent = numFotos + ' fotos';
-        }
-      }
-      cargarDatos();
 
       // 2. Guardar cambios en GitHub
       window.guardarConfigAdmin = async function() {

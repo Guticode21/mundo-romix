@@ -121,39 +121,111 @@
     </div>
   </div>
 
-  <script src="js/mensajes.js?v=1.1"></script>
-  <script src="js/app.js?v=1.1"></script>
-  <script src="js/issue-sync.js?v=1.1"></script>
+  <!-- BURBUJA DE CHAT FLOTANTE -->
+  <div id="chatBubble" class="chat-bubble" onclick="abrirModal('modalChat')">
+    <i class="fa-solid fa-comment-dots"></i>
+    <span id="chatBadge" class="chat-badge" style="display:none">!</span>
+  </div>
+
+  <!-- MODAL: CHAT EN TIEMPO REAL -->
+  <div class="modal-overlay" id="modalChat">
+    <div class="modal-sheet glass-card" style="max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="modal-handle"></div>
+      <div class="modal-title"><i class="fa-solid fa-comments"></i> Nuestro Chat Privado</div>
+      
+      <div id="chatContainer" class="chat-container">
+        <!-- Los mensajes aparecerán aquí -->
+      </div>
+
+      <div class="chat-input-area">
+        <input type="text" id="chatInput" placeholder="Escribe algo lindo..." onkeypress="if(event.key==='Enter') mandarMensaje()">
+        <button onclick="mandarMensaje()"><i class="fa-solid fa-paper-plane"></i></button>
+      </div>
+      
+      <button class="btn btn-outline btn-full mt-10" onclick="cerrarModal('modalChat')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ESTILOS EXTRAS PARA EL CHAT -->
+  <style>
+    .chat-bubble { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--vinotinto); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; cursor: pointer; transition: transform 0.3s; border: 2px solid var(--oro); }
+    .chat-bubble:active { transform: scale(0.9); }
+    .chat-badge { position: absolute; top: 0; right: 0; background: #ff4757; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+    .chat-container { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; }
+    .msg { padding: 8px 14px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; position: relative; }
+    .msg-fabi { align-self: flex-end; background: var(--vinotinto); color: white; border-bottom-right-radius: 4px; }
+    .msg-guti { align-self: flex-start; background: var(--oro); color: var(--vinotinto); border-bottom-left-radius: 4px; }
+    .chat-input-area { display: flex; gap: 8px; padding: 5px; }
+    .chat-input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--oro); background: rgba(255,255,255,0.1); color: var(--vinotinto); outline: none; }
+    .chat-input-area button { background: var(--vinotinto); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer; }
+  </style>
+
+  <!-- SCRIPTS DE FIREBASE -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="js/mensajes.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/firebase-config.js"></script>
+
   <script>
-    const usuario = protegerPagina('Fabi');
-    if(usuario){
-      document.getElementById('nombreUsuario').textContent = usuario;
+    const usuarioActual = protegerPagina('Fabi');
+    if(usuarioActual){
+      document.getElementById('nombreUsuario').textContent = usuarioActual;
       iniciarContador('contadorTiempo', new Date(2024, 8, 1));
 
-      // 1. Sincronización Inicial
-      sincronizarConIssue();
+      // === 1. SINCRONIZACIÓN DE DATOS (CONFIG) ===
+      db.ref('config').on('value', (snapshot) => {
+        const datos = snapshot.val();
+        if (datos) {
+          if(datos.mensaje) document.getElementById('msgTexto').textContent = datos.mensaje;
+          if(datos.pdfUrl) localStorage.setItem('mr_pdf_hitos_url', datos.pdfUrl);
+          if(datos.fotos) localStorage.setItem('mr_fotos_cloud', datos.fotos);
+        }
+      });
 
-      // 2. Vigilancia Automática (cada 5 minutos)
-      setInterval(sincronizarConIssue, 300000);
+      // === 2. CHAT EN TIEMPO REAL ===
+      db.ref('chat').limitToLast(20).on('value', (snapshot) => {
+        const container = document.getElementById('chatContainer');
+        const badge = document.getElementById('chatBadge');
+        container.innerHTML = '';
+        
+        snapshot.forEach((child) => {
+          const msg = child.val();
+          const div = document.createElement('div');
+          div.className = `msg msg-${msg.usuario.toLowerCase()}`;
+          div.textContent = msg.texto;
+          container.appendChild(div);
+        });
+        
+        container.scrollTop = container.scrollHeight;
+        
+        // Notificación de mensaje nuevo si el modal está cerrado
+        if(document.getElementById('modalChat').style.display !== 'flex') {
+          badge.style.display = 'flex';
+        }
+      });
 
-      // 3. Renderizar Galería (Issue + Locales)
-      window.renderGaleriaIssue = async function() {
+      window.mandarMensaje = () => {
+        const input = document.getElementById('chatInput');
+        if(input.value.trim()){
+          enviarChat('Fabi', input.value);
+          input.value = '';
+          document.getElementById('chatBadge').style.display = 'none';
+        }
+      };
+
+      // === 3. GALERÍA INTELIGENTE ===
+      window.renderGaleriaCloud = function() {
         const grid = document.getElementById('galeriaGrid');
         if(!grid) return;
-        
-        grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:20px; color:var(--oro);"><i class="fa-solid fa-spinner fa-spin"></i> Cargando recuerdos...</div>';
-
-        const datos = await obtenerDatosIssue();
         grid.innerHTML = ''; 
-
-        // Unir fotos del Issue con las locales predefinidas
-        let fotosIssue = (datos && datos.fotos) ? datos.fotos : [];
+        
+        let fotosCloud = localStorage.getItem('mr_fotos_cloud') ? localStorage.getItem('mr_fotos_cloud').split(',') : [];
         let fotosLocales = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
         
-        // Mostrar primero las fotos del Issue (las más nuevas)
-        const todasLasFotos = [...fotosIssue, ...fotosLocales.map(f => 'img/'+f)];
+        const todas = [...fotosCloud, ...fotosLocales.map(f => f.startsWith('http') ? f : 'img/'+f)];
 
-        todasLasFotos.forEach(src => {
+        todas.forEach(src => {
           const img = document.createElement('img');
           img.src = src;
           img.loading = "lazy";
@@ -165,25 +237,16 @@
 
       document.getElementById('cardFotos').onclick = () => {
         abrirModal('modalFotos');
-        renderGaleriaIssue();
+        renderGaleriaCloud();
       };
 
-      // Función para abrir el PDF (prioriza GitHub)
       window.abrirHitosPdf = function() {
-        const pdfUrl = localStorage.getItem('mr_pdf_hitos_url');
-        console.log("Abriendo PDF:", pdfUrl);
-        if(pdfUrl && pdfUrl.startsWith('http')) {
-          window.open(pdfUrl, '_blank');
-        } else {
-          window.open('hitos.pdf', '_blank');
-        }
+        const url = localStorage.getItem('mr_pdf_hitos_url') || 'hitos.pdf';
+        window.open(url, '_blank');
       };
-
       document.getElementById('btnHitosPdf').onclick = abrirHitosPdf;
 
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('./sw.js');
-      }
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
     }
   </script>
 </body>
