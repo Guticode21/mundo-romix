@@ -168,16 +168,18 @@
         renderGaleriaIssue();
       };
 
-      // Configurar botón de Hitos (PDF)
-      document.getElementById('cardHitos').onclick = () => {
+      // Función para abrir el PDF (prioriza GitHub)
+      window.abrirHitosPdf = function() {
         const pdfUrl = localStorage.getItem('mr_pdf_hitos_url');
-        if(pdfUrl) {
+        console.log("Abriendo PDF:", pdfUrl);
+        if(pdfUrl && pdfUrl.startsWith('http')) {
           window.open(pdfUrl, '_blank');
         } else {
-          // Fallback al archivo local si no hay en el Issue
           window.open('hitos.pdf', '_blank');
         }
       };
+
+      document.getElementById('btnHitosPdf').onclick = abrirHitosPdf;
 
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('./sw.js');
