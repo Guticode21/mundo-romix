@@ -10,18 +10,25 @@ const REPO_URL = "https://api.github.com/repos/Guticode21/mundo-romix/issues";
  */
 async function obtenerDatosIssue() {
   try {
-    // Añadimos un timestamp para evitar cache del navegador
+    console.log("Conectando con GitHub Issues...");
     const response = await fetch(REPO_URL + "?t=" + Date.now());
-    const issues = await response.json();
     
-    // Buscamos el issue con el título específico
-    const issue = issues.find(i => i.title === "DATOS MUNDO ROMIX");
-    
-    if (!issue) {
-      console.warn("No se encontró el Issue 'DATOS MUNDO ROMIX'");
+    if (!response.ok) {
+      console.error("Error de GitHub:", response.status);
       return null;
     }
 
+    const issues = await response.json();
+    console.log("Issues encontrados:", issues.length);
+    
+    const issue = issues.find(i => i.title === "DATOS MUNDO ROMIX");
+    
+    if (!issue) {
+      console.error("No se encontró el Issue con título 'DATOS MUNDO ROMIX'. Asegúrate de que el título sea EXACTAMENTE ese (en mayúsculas).");
+      return null;
+    }
+
+    console.log("¡Datos encontrados!");
     const body = issue.body || "";
     
     // 1. Extraer el mensaje (todo el texto antes del primer enlace o archivo)
