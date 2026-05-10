@@ -3,7 +3,7 @@
    Maneja caché offline y notificaciones diarias
    ============================================= */
 
-const CACHE_NAME = 'mundo-romix-v1';
+const CACHE_NAME = 'mundo-romix-v1.3';
 const ARCHIVOS_CACHE = [
   './',
   './index.html',
@@ -12,8 +12,10 @@ const ARCHIVOS_CACHE = [
   './css/estilos.css',
   './js/app.js',
   './js/mensajes.js',
+  './js/firebase-config.js',
   './manifest.json',
   './img/logo.png',
+  './img/corazon.png',
   'https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'
 ];

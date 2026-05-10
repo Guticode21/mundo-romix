@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyNest — Dashboard Académico</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+
+    <!-- BARRA DE INFORMACIÓN -->
+    <div class="info-bar">
+        <span><i class="fa-solid fa-calendar-days"></i> Ciclo Lectivo: 2024-2</span>
+        <span><i class="fa-solid fa-building-columns"></i> Facultad de Ingeniería</span>
+    </div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-graduation-cap"></i> StudyNest
+        </div>
+        <div class="user-info">
+            <span id="userName">Cargando...</span>
+            <button class="btn btn-outline" onclick="logout()" title="Salir">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
+        </div>
+    </header>
+
+    <main class="container">
+        
+        <div class="dashboard-header">
+            <div class="welcome">
+                <h1>Mis Materias</h1>
+                <p>Gestiona tu semestre académico de forma sencilla.</p>
+            </div>
+            
+            <div class="enroll-box">
+                <input type="text" id="classCode" placeholder="Código (ej. CAL1)">
+                <button class="btn btn-primary" onclick="enrollClass()">
+                    <i class="fa-solid fa-plus"></i> Unirme
+                </button>
+            </div>
+        </div>
+
+        <div id="subjectsGrid" class="subjects-grid">
+            <!-- Las tarjetas de materias se cargarán aquí -->
+        </div>
+
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
