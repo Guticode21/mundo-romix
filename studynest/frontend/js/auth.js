@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:5000/api';
 
 document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.getElementById('loginForm');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     localStorage.setItem('usuarioId', data.user.id);
                     localStorage.setItem('usuarioNombre', data.user.nombre);
-                    window.location.href = 'dashboard.html';
+                                                            window.location.href = 'dashboard.html';
                 } else {
                     alert(data.error || 'Error al iniciar sesión');
                 }

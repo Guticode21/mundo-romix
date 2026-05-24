@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:5000/api';
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', () => {
@@ -98,4 +98,176 @@ async function enrollClass() {
 function logout() {
     localStorage.clear();
     location.reload();
+}
+
+// --- FUNCIONES AUXILIARES PARA NUEVAS CARACTERÍSTICAS (FASE 2) ---
+
+// Obtener perfil del usuario actual
+async function obtenerPerfil() {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/usuarios/perfil`, {
+            headers: { 'usuario-id': userId }
+        });
+        if (!response.ok) throw new Error('Error al obtener perfil');
+        return await response.ok ? response.json() : null;
+    } catch (error) {
+        console.error('Error en obtenerPerfil:', error);
+        return null;
+    }
+}
+
+// Actualizar perfil del usuario actual (Nombre y foto/avatar)
+async function actualizarPerfil(nombre, foto) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/usuarios/perfil`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario-id': userId
+            },
+            body: JSON.stringify({ nombre, foto })
+        });
+        const result = await response.json();
+        if (response.ok) {
+            localStorage.setItem('usuarioNombre', nombre); // Actualizar sesión local
+        }
+        return result;
+    } catch (error) {
+        console.error('Error en actualizarPerfil:', error);
+        return { error: 'Error de conexión' };
+    }
+}
+
+// Obtener los compañeros inscritos en una materia
+async function obtenerCompaneros(materiaId) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/materias/${materiaId}/companeros`, {
+            headers: { 'usuario-id': userId }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en obtenerCompaneros:', error);
+        return [];
+    }
+}
+
+// Obtener mensajes del foro/chat de una materia
+async function obtenerMensajesForo(materiaId) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/materias/${materiaId}/mensajes`, {
+            headers: { 'usuario-id': userId }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en obtenerMensajesForo:', error);
+        return [];
+    }
+}
+
+// Enviar un mensaje al foro/chat de una materia
+async function enviarMensajeForo(materiaId, mensaje) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/materias/${materiaId}/mensajes`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario-id': userId
+            },
+            body: JSON.stringify({ mensaje })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en enviarMensajeForo:', error);
+        return { error: 'Error de conexión' };
+    }
+}
+
+// Obtener las tareas de una materia (incluye estatus de completada para el usuario)
+async function obtenerTareas(materiaId) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/materias/${materiaId}/tareas`, {
+            headers: { 'usuario-id': userId }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en obtenerTareas:', error);
+        return [];
+    }
+}
+
+// Crear una nueva tarea para una materia
+async function crearTarea(materiaId, titulo, descripcion, fechaEntrega) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/materias/${materiaId}/tareas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario-id': userId
+            },
+            body: JSON.stringify({ titulo, descripcion, fecha_entrega: fechaEntrega })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en crearTarea:', error);
+        return { error: 'Error de conexión' };
+    }
+}
+
+// Alternar estatus de completado de una tarea
+async function alternarCompletarTarea(tareaId, completada) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/tareas/${tareaId}/completar`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario-id': userId
+            },
+            body: JSON.stringify({ completada })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en alternarCompletarTarea:', error);
+        return { error: 'Error de conexión' };
+    }
+}
+
+// Obtener comentarios de una tarea
+async function obtenerComentariosTarea(tareaId) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/tareas/${tareaId}/comentarios`, {
+            headers: { 'usuario-id': userId }
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en obtenerComentariosTarea:', error);
+        return [];
+    }
+}
+
+// Agregar un comentario a una tarea
+async function agregarComentarioTarea(tareaId, comentario) {
+    const userId = localStorage.getItem('usuarioId');
+    try {
+        const response = await fetch(`${API_URL}/tareas/${tareaId}/comentarios`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'usuario-id': userId
+            },
+            body: JSON.stringify({ comentario })
+        });
+        return await response.json();
+    } catch (error) {
+        console.error('Error en agregarComentarioTarea:', error);
+        return { error: 'Error de conexión' };
+    }
 }
