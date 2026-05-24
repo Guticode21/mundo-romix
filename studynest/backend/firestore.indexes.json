@@ -1,0 +1,13 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "recordatorios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "completado", "order": "ASCENDING" },
+        { "fieldPath": "fechaLimite", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
