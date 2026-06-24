@@ -205,12 +205,15 @@
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
       setTimeout(() => {
-        if (usuario === 'Fabi' && pass === 'romix21') {
+        // Normalizar a Fabi/Guti con mayúscula inicial
+        const userClean = usuario.toLowerCase() === 'fabi' ? 'Fabi' : (usuario.toLowerCase() === 'guti' ? 'Guti' : usuario);
+
+        if (userClean === 'Fabi' && pass === 'romix21') {
           localStorage.setItem('mr_usuario', 'Fabi');
           window.location.href = 'dashboard.html';
-        } else if (usuario === 'Guti' && pass === 'admin123') {
+        } else if (userClean === 'Guti' && pass === 'admin123') {
           localStorage.setItem('mr_usuario', 'Guti');
-          window.location.href = 'admin.html';
+          window.location.href = 'dashboard.html'; // Ambos entran al dashboard para ver el chat, Guti tendrá un botón de admin allí
         } else {
           errorEl.classList.remove('hidden');
           document.getElementById('loginErrorMsg').textContent =

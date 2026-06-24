@@ -32,9 +32,14 @@
       <img src="img/logo.png" alt="Logo" style="width: 30px; height: 30px; border-radius: 8px; vertical-align: middle; margin-right: 8px;">
       Mundo Romix
     </span>
-    <button class="topbar-btn" onclick="cerrarSesion()" title="Cerrar sesión" id="btnLogout">
-      <i class="fa-solid fa-right-from-bracket"></i>
-    </button>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <button class="topbar-btn" onclick="window.location.href='admin.html'" title="Panel Admin" id="btnAdmin" style="display: none; background: var(--oro); color: var(--vinotinto);">
+        <i class="fa-solid fa-screwdriver-wrench"></i>
+      </button>
+      <button class="topbar-btn" onclick="cerrarSesion()" title="Cerrar sesión" id="btnLogout">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
   </header>
 
   <div class="page-container">
@@ -153,8 +158,10 @@
     .chat-badge { position: absolute; top: 0; right: 0; background: #ff4757; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
     .chat-container { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; }
     .msg { padding: 8px 14px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; position: relative; }
-    .msg-fabi { align-self: flex-end; background: var(--vinotinto); color: white; border-bottom-right-radius: 4px; }
-    .msg-guti { align-self: flex-start; background: var(--oro); color: var(--vinotinto); border-bottom-left-radius: 4px; }
+    .msg-fabi { background: var(--vinotinto); color: white; }
+    .msg-guti { background: var(--oro); color: var(--vinotinto); }
+    .msg-derecha { align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg-izquierda { align-self: flex-start; border-bottom-left-radius: 4px; }
     .chat-input-area { display: flex; gap: 8px; padding: 5px; }
     .chat-input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--oro); background: rgba(255,255,255,0.1); color: var(--vinotinto); outline: none; }
     .chat-input-area button { background: var(--vinotinto); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer; }
@@ -168,10 +175,20 @@
   <script src="js/firebase-config.js"></script>
 
   <script>
-    const usuarioActual = protegerPagina('Fabi');
+    const usuarioActual = protegerPagina(); // Permite tanto a Fabi como a Guti
     if(usuarioActual){
       document.getElementById('nombreUsuario').textContent = usuarioActual;
       iniciarContador('contadorTiempo', new Date(2024, 8, 1));
+
+      // Si el usuario es Guti, mostrar el botón de administración y adaptar la vista
+      if (usuarioActual === 'Guti') {
+        const btnAdmin = document.getElementById('btnAdmin');
+        if (btnAdmin) btnAdmin.style.display = 'inline-flex';
+        
+        // Cambiar firma de la tarjeta para que tenga sentido para Guti
+        const firma = document.querySelector('.msg-firma');
+        if (firma) firma.textContent = '— Tu mensaje para Fabi 💌';
+      }
 
       // === 1. SINCRONIZACIÓN DE DATOS (CONFIG) ===
       db.ref('config').on('value', (snapshot) => {
@@ -196,7 +213,8 @@
         snapshot.forEach((child) => {
           const msg = child.val();
           const div = document.createElement('div');
-          div.className = `msg msg-${msg.usuario.toLowerCase()}`;
+          const esPropio = msg.usuario.toLowerCase() === usuarioActual.toLowerCase();
+          div.className = `msg msg-${msg.usuario.toLowerCase()} ${esPropio ? 'msg-derecha' : 'msg-izquierda'}`;
           div.textContent = msg.texto;
           container.appendChild(div);
         });
@@ -212,7 +230,7 @@
       window.mandarMensaje = () => {
         const input = document.getElementById('chatInput');
         if(input.value.trim()){
-          enviarChat('Fabi', input.value);
+          enviarChat(usuarioActual, input.value);
           input.value = '';
           document.getElementById('chatBadge').style.display = 'none';
         }
