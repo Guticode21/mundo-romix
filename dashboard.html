@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
   <link rel="stylesheet" href="css/estilos.css"/>
   <style>
     .bienvenida-texto{font-size:1.1rem;font-weight:600;color:var(--vinotinto);margin-top:18px;text-align:center;line-height:1.5}
@@ -22,6 +23,13 @@
     .amor-corazon{font-size:4rem;animation:heartbeat 1.2s ease-in-out infinite;display:block;margin-bottom:12px}
     .lightbox-img{max-width:100%;max-height:60vh;border-radius:16px;margin-bottom:12px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
     .lightbox-caption{color:var(--vinotinto);font-weight:700;text-align:center;font-size:.95rem}
+    .swiper { width: 100%; height: 60vh; border-radius: 16px; margin-top: 15px; }
+    .swiper-slide { text-align: center; display: flex; justify-content: center; align-items: center; background: #000; border-radius: 16px; overflow: hidden; }
+    .swiper-slide img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    .mood-btn { background: rgba(255,255,255,0.2); border: 1px solid var(--oro); border-radius: 20px; padding: 5px 15px; cursor: pointer; color: var(--vinotinto); font-weight: 600; margin: 5px; transition: 0.3s; }
+    .mood-btn.active { background: var(--vinotinto); color: white; }
+    .audio-player { margin-top: 20px; width: 100%; text-align: center; }
+    .audio-player audio { width: 100%; max-width: 300px; height: 35px; border-radius: 20px; }
   </style>
 </head>
 <body>
@@ -64,6 +72,37 @@
       <div class="msg-firma">— Con amor, Guti 💌</div>
     </div>
 
+    <!-- CALENDARIO -->
+    <div class="glass-card fade-in" style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-size:0.85rem; color:var(--oro); font-weight:700;"><i class="fa-solid fa-calendar-heart"></i> PRÓXIMO ANIVERSARIO</div>
+        <div style="font-size:1.1rem; color:var(--vinotinto); font-weight:800; margin-top:5px;">1 de Septiembre</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:1.5rem; color:var(--vinotinto); font-weight:800;" id="diasFaltantes">--</div>
+        <div style="font-size:0.75rem; color:var(--oro); font-weight:700;">DÍAS FALTAN</div>
+      </div>
+    </div>
+
+    <!-- MOOD TRACKER -->
+    <div class="glass-card fade-in" style="margin-top:20px; text-align:center;">
+      <div style="font-size:0.9rem; color:var(--vinotinto); font-weight:700; margin-bottom:10px;"><i class="fa-solid fa-face-smile"></i> ¿CÓMO TE SIENTES HOY?</div>
+      <div>
+        <button class="mood-btn" onclick="setMood('Feliz 😊')" id="mood-Feliz">Feliz 😊</button>
+        <button class="mood-btn" onclick="setMood('Te extraño 🥺')" id="mood-Extrano">Te extraño 🥺</button>
+        <button class="mood-btn" onclick="setMood('Cansada 😴')" id="mood-Cansada">Cansada 😴</button>
+      </div>
+      <div style="margin-top:10px; font-size:0.8rem; color:var(--oro); font-weight:600;" id="partnerMood">Cargando estado de tu pareja...</div>
+    </div>
+    
+    <!-- REPRODUCTOR -->
+    <div class="audio-player fade-in">
+      <audio controls loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio.
+      </audio>
+    </div>
+
     <!-- SECCIONES GRID -->
     <div class="section-grid fade-in">
       <div class="glass-card section-card" onclick="abrirModal('modalFotos'); renderGaleria();" id="cardFotos">
@@ -90,10 +129,17 @@
     <div class="modal-sheet glass-card">
       <div class="modal-handle"></div>
       <div class="modal-title"><i class="fa-solid fa-images"></i> Nuestra Galería</div>
-      <p style="font-size:.85rem;color:var(--oro);margin-bottom:16px;font-weight:600">Toca una foto para verla 📸</p>
-      <div class="galeria-grid" id="galeriaGrid">
-        <!-- Fotos cargadas dinámicamente desde localStorage -->
+      <p style="font-size:.85rem;color:var(--oro);margin-bottom:16px;font-weight:600">Desliza para ver más 📸</p>
+      
+      <div class="swiper mySwiper">
+        <div class="swiper-wrapper" id="swiperWrapper">
+          <!-- Slides cargados dinámicamente -->
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next" style="color:var(--oro);"></div>
+        <div class="swiper-button-prev" style="color:var(--oro);"></div>
       </div>
+
       <p id="galeriaHint" style="font-size:.8rem;color:rgba(94,11,21,.5);margin-top:14px;text-align:center">
         Guti debe agregar las fotos desde el panel admin 📸
       </p>
@@ -169,10 +215,13 @@
 
   <!-- SCRIPTS DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="js/mensajes.js"></script>
-  <script src="js/app.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
 
   <script>
     const usuarioActual = protegerPagina(); // Permite tanto a Fabi como a Guti
@@ -205,26 +254,73 @@
       });
 
       // === 2. CHAT EN TIEMPO REAL ===
+      // Solicitar permisos de notificación
+      if ("Notification" in window) {
+        Notification.requestPermission();
+      }
+      
+      let isInitialLoad = true;
+      
       db.ref('chat').limitToLast(20).on('value', (snapshot) => {
         const container = document.getElementById('chatContainer');
         const badge = document.getElementById('chatBadge');
         container.innerHTML = '';
         
+        let lastMsg = null;
+
         snapshot.forEach((child) => {
           const msg = child.val();
+          lastMsg = msg;
+          const msgId = child.key;
           const div = document.createElement('div');
           const esPropio = msg.usuario.toLowerCase() === usuarioActual.toLowerCase();
           div.className = `msg msg-${msg.usuario.toLowerCase()} ${esPropio ? 'msg-derecha' : 'msg-izquierda'}`;
+          div.style.position = 'relative';
           div.textContent = msg.texto;
+
+          // Mostrar reacción
+          if (msg.hearts && msg.hearts > 0) {
+            const heartBadge = document.createElement('div');
+            heartBadge.style.cssText = 'position:absolute; bottom:-10px; right:5px; background:white; border-radius:10px; padding:2px 5px; font-size:0.8rem; box-shadow:0 2px 4px rgba(0,0,0,0.1); color:red;';
+            heartBadge.innerHTML = '❤️ ' + (msg.hearts > 1 ? `<span style="font-size:0.7rem">${msg.hearts}</span>` : '');
+            div.appendChild(heartBadge);
+          }
+
+          // Doble toque (Móvil) o Doble Clic (PC)
+          let lastTap = 0;
+          div.addEventListener('touchend', function(e) {
+             let currentTime = new Date().getTime();
+             let tapLength = currentTime - lastTap;
+             if (tapLength < 500 && tapLength > 0) {
+                 e.preventDefault();
+                 db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
+             }
+             lastTap = currentTime;
+          });
+          div.addEventListener('dblclick', function(e) {
+             db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
+          });
+
           container.appendChild(div);
         });
         
         container.scrollTop = container.scrollHeight;
         
-        // Notificación de mensaje nuevo si el modal está cerrado
-        if(document.getElementById('modalChat').style.display !== 'flex') {
-          badge.style.display = 'flex';
+        // Lógica de Notificaciones
+        if(!isInitialLoad && lastMsg && lastMsg.usuario.toLowerCase() !== usuarioActual.toLowerCase()) {
+          // Si el modal de chat está cerrado, mostramos el badge
+          if(document.getElementById('modalChat').style.display !== 'flex') {
+            badge.style.display = 'flex';
+          }
+          // Enviar notificación nativa si la página está oculta (en otra pestaña) o minimizada
+          if (document.hidden && Notification.permission === "granted") {
+            new Notification(`Nuevo mensaje de ${lastMsg.usuario} 💖`, {
+              body: lastMsg.texto,
+              icon: 'img/logo.png'
+            });
+          }
         }
+        isInitialLoad = false;
       });
 
       window.mandarMensaje = () => {
@@ -236,24 +332,36 @@
         }
       };
 
-      // === 3. GALERÍA INTELIGENTE ===
+      // === 3. GALERÍA SWIPER ===
       window.renderGaleriaCloud = function() {
-        const grid = document.getElementById('galeriaGrid');
-        if(!grid) return;
-        grid.innerHTML = ''; 
+        const wrapper = document.getElementById('swiperWrapper');
+        if(!wrapper) return;
+        wrapper.innerHTML = ''; 
         
         let fotosCloud = localStorage.getItem('mr_fotos_cloud') ? localStorage.getItem('mr_fotos_cloud').split(',') : [];
         let fotosLocales = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
         
-        const todas = [...fotosCloud, ...fotosLocales.map(f => f.startsWith('http') ? f : 'img/'+f)];
+        const todas = [...fotosCloud, ...fotosLocales.map(f => f.startsWith('http') ? f : 'img/'+f)].filter(f => f.trim() !== "");
 
         todas.forEach(src => {
+          const slide = document.createElement('div');
+          slide.className = 'swiper-slide';
           const img = document.createElement('img');
           img.src = src;
           img.loading = "lazy";
-          img.onclick = () => abrirImagen(img.src, "Nuestro recuerdo 💖");
-          img.onerror = () => img.remove();
-          grid.appendChild(img);
+          slide.appendChild(img);
+          wrapper.appendChild(slide);
+        });
+
+        // Initialize Swiper
+        if (window.mySwiperInstance) {
+          window.mySwiperInstance.destroy();
+        }
+        window.mySwiperInstance = new Swiper(".mySwiper", {
+          navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
+          pagination: { el: ".swiper-pagination", clickable: true, dynamicBullets: true },
+          grabCursor: true,
+          loop: todas.length > 1
         });
       };
 
@@ -261,6 +369,32 @@
         abrirModal('modalFotos');
         renderGaleriaCloud();
       };
+
+      // === 4. MOOD TRACKER & CALENDARIO ===
+      const calcularDiasAniversario = () => {
+        const hoy = new Date();
+        const anio = hoy.getMonth() >= 8 ? hoy.getFullYear() + 1 : hoy.getFullYear();
+        const prox = new Date(anio, 8, 1); // 1 de Septiembre (mes 8)
+        const diff = Math.ceil((prox - hoy) / (1000 * 60 * 60 * 24));
+        document.getElementById('diasFaltantes').textContent = diff;
+      };
+      calcularDiasAniversario();
+
+      window.setMood = (mood) => {
+        document.querySelectorAll('.mood-btn').forEach(btn => btn.classList.remove('active'));
+        if(mood.includes('Feliz')) document.getElementById('mood-Feliz').classList.add('active');
+        if(mood.includes('extraño')) document.getElementById('mood-Extrano').classList.add('active');
+        if(mood.includes('Cansada')) document.getElementById('mood-Cansada').classList.add('active');
+        db.ref('moods/' + usuarioActual).set(mood);
+      };
+
+      db.ref('moods').on('value', snap => {
+        const moods = snap.val() || {};
+        const partner = usuarioActual === 'Fabi' ? 'Guti' : 'Fabi';
+        if (moods[partner]) {
+          document.getElementById('partnerMood').textContent = `${partner} se siente: ${moods[partner]}`;
+        }
+      });
 
       window.abrirHitosPdf = function() {
         const url = localStorage.getItem('mr_pdf_hitos_url') || 'hitos.pdf';

@@ -152,6 +152,10 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
   <script src="js/app.js"></script>
   <script>
     // Registrar Service Worker con versión para forzar actualización
@@ -191,7 +195,7 @@
       }
     });
 
-    // === LOGIN ===
+    // === LOGIN CON FIREBASE AUTH ===
     document.getElementById('loginForm').addEventListener('submit', function (e) {
       e.preventDefault();
 
@@ -204,24 +208,49 @@
       btn.disabled = true;
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Entrando...';
 
-      setTimeout(() => {
-        // Normalizar a Fabi/Guti con mayúscula inicial
-        const userClean = usuario.toLowerCase() === 'fabi' ? 'Fabi' : (usuario.toLowerCase() === 'guti' ? 'Guti' : usuario);
+      // Normalizar nombre de usuario
+      const userClean = usuario.toLowerCase() === 'fabi' ? 'Fabi' : (usuario.toLowerCase() === 'guti' ? 'Guti' : usuario);
+      const email = userClean.toLowerCase() + '@mundoromix.com';
 
-        if (userClean === 'Fabi' && pass === 'romix21') {
-          localStorage.setItem('mr_usuario', 'Fabi');
+      if (userClean !== 'Fabi' && userClean !== 'Guti') {
+        errorEl.classList.remove('hidden');
+        document.getElementById('loginErrorMsg').textContent = 'Usuario no reconocido. Solo Fabi o Guti. 💔';
+        resetBtn();
+        return;
+      }
+
+      // Intentar iniciar sesión
+      auth.signInWithEmailAndPassword(email, pass)
+        .then((userCredential) => {
+          localStorage.setItem('mr_usuario', userClean);
           window.location.href = 'dashboard.html';
-        } else if (userClean === 'Guti' && pass === 'admin123') {
-          localStorage.setItem('mr_usuario', 'Guti');
-          window.location.href = 'dashboard.html'; // Ambos entran al dashboard para ver el chat, Guti tendrá un botón de admin allí
-        } else {
-          errorEl.classList.remove('hidden');
-          document.getElementById('loginErrorMsg').textContent =
-            'Usuario o contraseña incorrectos. Inténtalo de nuevo. 💔';
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fa-solid fa-door-open"></i> Entrar a nuestro mundo';
-        }
-      }, 700);
+        })
+        .catch((error) => {
+          // Si el usuario no existe, lo creamos automáticamente (primera vez)
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-login-credentials') {
+             auth.createUserWithEmailAndPassword(email, pass)
+               .then(() => {
+                 localStorage.setItem('mr_usuario', userClean);
+                 window.location.href = 'dashboard.html';
+               })
+               .catch((createError) => {
+                 mostrarError(createError.message);
+               });
+          } else {
+             mostrarError('Usuario o contraseña incorrectos. Inténtalo de nuevo. 💔');
+          }
+        });
+
+      function mostrarError(msg) {
+        errorEl.classList.remove('hidden');
+        document.getElementById('loginErrorMsg').textContent = msg;
+        resetBtn();
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-door-open"></i> Entrar a nuestro mundo';
+      }
     });
   </script>
 </body>

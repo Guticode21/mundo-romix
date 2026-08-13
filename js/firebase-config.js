@@ -19,11 +19,15 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-// Obtener referencia a la base de datos de tiempo real
+// Obtener referencias
 const db = firebase.database();
+const auth = firebase.auth();
+const storage = firebase.storage();
 
-// Hacer la referencia db accesible globalmente, ya que dashboard.html y admin.html la usan directamente
+// Hacer las referencias accesibles globalmente
 window.db = db;
+window.auth = auth;
+window.storage = storage;
 
 /**
  * Envía un mensaje al chat en tiempo real en Firebase

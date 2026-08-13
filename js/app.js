@@ -16,13 +16,31 @@ function protegerPagina(rolEsperado) {
     window.location.href = 'index.html';
     return null;
   }
+
+  // Verificar estado con Firebase Auth asíncronamente
+  if (typeof auth !== 'undefined') {
+    auth.onAuthStateChanged((user) => {
+      if (!user) {
+        localStorage.removeItem('mr_usuario');
+        window.location.href = 'index.html';
+      }
+    });
+  }
+
   return usuario;
 }
 
 /** Cierra sesión */
 function cerrarSesion() {
-  localStorage.removeItem('mr_usuario');
-  window.location.href = 'index.html';
+  if (typeof auth !== 'undefined') {
+    auth.signOut().then(() => {
+      localStorage.removeItem('mr_usuario');
+      window.location.href = 'index.html';
+    });
+  } else {
+    localStorage.removeItem('mr_usuario');
+    window.location.href = 'index.html';
+  }
 }
 
 // ======= CONTADOR EN TIEMPO REAL =======

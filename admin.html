@@ -37,15 +37,21 @@
 
       <div class="admin-section-title"><i class="fa-solid fa-file-pdf"></i> ENLACE HITOS (PDF)</div>
       <div class="input-group">
-        <i class="fa-solid fa-link"></i>
-        <input type="text" id="adminPdf" class="input-field" placeholder="Pega el link del PDF aquí...">
+        <i class="fa-solid fa-file-arrow-up"></i>
+        <input type="file" id="adminPdfFile" class="input-field" accept="application/pdf">
       </div>
+      <div id="pdfUploadStatus" style="font-size:0.85rem; color:var(--oro); margin-top:-10px; margin-bottom:15px;"></div>
 
-      <div class="admin-section-title"><i class="fa-solid fa-images"></i> GALERÍA (LINKS)</div>
+      <div class="admin-section-title"><i class="fa-solid fa-images"></i> GALERÍA (NUEVAS FOTOS)</div>
       <div class="input-group">
         <i class="fa-solid fa-camera"></i>
-        <input type="text" id="adminFotos" class="input-field" placeholder="Link1, Link2, Link3...">
+        <input type="file" id="adminFotosFile" class="input-field" accept="image/*" multiple>
       </div>
+      <div id="fotosUploadStatus" style="font-size:0.85rem; color:var(--oro); margin-top:-10px; margin-bottom:15px;"></div>
+      
+      <!-- Input oculto para mantener las fotos actuales -->
+      <input type="hidden" id="fotosActuales">
+      <input type="hidden" id="pdfActual">
 
       <button class="btn btn-save btn-full" onclick="guardarCambios()">
         <i class="fa-solid fa-cloud-arrow-up"></i> ACTUALIZAR TODO
@@ -80,9 +86,11 @@
 
   <!-- SCRIPTS DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-  <script src="js/app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="js/app.js"></script>
 
   <script>
     const usuarioActual = protegerPagina('Guti');
@@ -93,8 +101,12 @@
         const datos = snapshot.val();
         if(datos){
           document.getElementById('adminMensaje').value = datos.mensaje || '';
-          document.getElementById('adminPdf').value = datos.pdfUrl || '';
-          document.getElementById('adminFotos').value = datos.fotos || '';
+          document.getElementById('pdfActual').value = datos.pdfUrl || '';
+          document.getElementById('fotosActuales').value = datos.fotos || '';
+          
+          if(datos.pdfUrl) {
+            document.getElementById('pdfUploadStatus').innerHTML = `Actual: <a href="${datos.pdfUrl}" target="_blank" style="color:var(--vinotinto)">Ver PDF actual</a>`;
+          }
         }
       });
 
@@ -104,9 +116,25 @@
         container.innerHTML = '';
         snapshot.forEach((child) => {
           const msg = child.val();
+          const msgId = child.key;
           const div = document.createElement('div');
           div.className = `msg msg-${msg.usuario.toLowerCase()}`;
+          div.style.position = 'relative';
           div.textContent = msg.texto;
+
+          // Mostrar reacción
+          if (msg.hearts && msg.hearts > 0) {
+            const heartBadge = document.createElement('div');
+            heartBadge.style.cssText = 'position:absolute; bottom:-10px; right:5px; background:white; border-radius:10px; padding:2px 5px; font-size:0.8rem; box-shadow:0 2px 4px rgba(0,0,0,0.1); color:red;';
+            heartBadge.innerHTML = '❤️ ' + (msg.hearts > 1 ? `<span style="font-size:0.7rem">${msg.hearts}</span>` : '');
+            div.appendChild(heartBadge);
+          }
+
+          // Doble Clic (PC) / Doble toque
+          div.addEventListener('dblclick', function(e) {
+             db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
+          });
+
           container.appendChild(div);
         });
         container.scrollTop = container.scrollHeight;
@@ -126,18 +154,72 @@
         }
       };
 
-      window.guardarCambios = function() {
-        const mensaje = document.getElementById('adminMensaje').value.trim();
-        const pdfUrl = document.getElementById('adminPdf').value.trim();
-        const fotos = document.getElementById('adminFotos').value.trim();
-        
-        actualizarConfig({ mensaje, pdfUrl, fotos });
-        alert('✅ ¡Mundo Romix actualizado!');
+      window.guardarCambios = async function() {
+        const btn = document.querySelector('.btn-save');
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> SUBIENDO...';
+        btn.disabled = true;
+
+        try {
+          const mensaje = document.getElementById('adminMensaje').value.trim();
+          let pdfUrl = document.getElementById('pdfActual').value;
+          let fotosActuales = document.getElementById('fotosActuales').value;
+          
+          // Subir PDF si se seleccionó uno
+          const pdfFile = document.getElementById('adminPdfFile').files[0];
+          if (pdfFile) {
+            document.getElementById('pdfUploadStatus').textContent = 'Subiendo PDF...';
+            const pdfRef = storage.ref('documentos/hitos.pdf');
+            await pdfRef.put(pdfFile);
+            pdfUrl = await pdfRef.getDownloadURL();
+            document.getElementById('pdfUploadStatus').textContent = 'PDF subido con éxito ✅';
+          }
+
+          // Subir fotos si se seleccionaron
+          const fotoFiles = document.getElementById('adminFotosFile').files;
+          if (fotoFiles.length > 0) {
+            document.getElementById('fotosUploadStatus').textContent = `Subiendo ${fotoFiles.length} foto(s)...`;
+            let nuevasUrls = [];
+            for (let i = 0; i < fotoFiles.length; i++) {
+              const file = fotoFiles[i];
+              const fotoRef = storage.ref('galeria/' + Date.now() + '_' + file.name);
+              await fotoRef.put(file);
+              const url = await fotoRef.getDownloadURL();
+              nuevasUrls.push(url);
+            }
+            
+            // Añadir las nuevas fotos a la lista existente
+            if (fotosActuales && fotosActuales.trim() !== "") {
+              fotosActuales = fotosActuales + ',' + nuevasUrls.join(',');
+            } else {
+              fotosActuales = nuevasUrls.join(',');
+            }
+            document.getElementById('fotosUploadStatus').textContent = 'Fotos subidas con éxito ✅';
+          }
+          
+          // Actualizar Realtime Database
+          actualizarConfig({ mensaje, pdfUrl, fotos: fotosActuales });
+          
+          // Limpiar inputs de archivo
+          document.getElementById('adminPdfFile').value = "";
+          document.getElementById('adminFotosFile').value = "";
+          
+          alert('✅ ¡Mundo Romix actualizado!');
+        } catch (error) {
+          console.error("Error al subir archivos:", error);
+          alert('❌ Hubo un error al subir los archivos: ' + error.message);
+        } finally {
+          btn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> ACTUALIZAR TODO';
+          btn.disabled = false;
+        }
       };
 
       window.cerrarSesion = function() {
-        localStorage.removeItem('mr_usuario');
-        window.location.href = 'index.html';
+        if (typeof auth !== 'undefined') {
+          auth.signOut().then(() => {
+            localStorage.removeItem('mr_usuario');
+            window.location.href = 'index.html';
+          });
+        }
       };
     }
   </script>
