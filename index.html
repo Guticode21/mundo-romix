@@ -226,18 +226,25 @@
           window.location.href = 'dashboard.html';
         })
         .catch((error) => {
-          // Si el usuario no existe, lo creamos automáticamente (primera vez)
-          if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-login-credentials') {
+          // Si el usuario no existe, o las credenciales no cuadran (puede ser primera vez), intentamos crearlo
+          if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential') {
              auth.createUserWithEmailAndPassword(email, pass)
                .then(() => {
                  localStorage.setItem('mr_usuario', userClean);
                  window.location.href = 'dashboard.html';
                })
                .catch((createError) => {
-                 mostrarError(createError.message);
+                 if (createError.code === 'auth/email-already-in-use') {
+                    mostrarError('Contraseña incorrecta. Inténtalo de nuevo. 💔');
+                 } else if (createError.code === 'auth/weak-password') {
+                    mostrarError('La contraseña debe tener al menos 6 caracteres.');
+                 } else {
+                    // Muestra error exacto de Firebase (ej. auth/operation-not-allowed si no activaste el proveedor)
+                    mostrarError('Error de Firebase: ' + createError.message);
+                 }
                });
           } else {
-             mostrarError('Usuario o contraseña incorrectos. Inténtalo de nuevo. 💔');
+             mostrarError('Error de Firebase: ' + error.message);
           }
         });
 
