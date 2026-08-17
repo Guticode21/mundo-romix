@@ -161,7 +161,7 @@
   <script>
     // Registrar Service Worker con versión para forzar actualización
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=1.3')
+      navigator.serviceWorker.register('./sw.js?v=1.9')
         .then(() => console.log('[MR] Service Worker actualizado ✅'))
         .catch(err => console.warn('[MR] SW error:', err));
     }

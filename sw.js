@@ -3,7 +3,7 @@
    Maneja caché offline y notificaciones diarias
    ============================================= */
 
-const CACHE_NAME = 'mundo-romix-v1.8';
+const CACHE_NAME = 'mundo-romix-v1.9';
 const ARCHIVOS_CACHE = [
   './',
   './index.html',
