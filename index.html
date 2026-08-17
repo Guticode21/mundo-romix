@@ -223,6 +223,9 @@
       // Intentar iniciar sesión
       auth.signInWithEmailAndPassword(email, pass)
         .then((userCredential) => {
+          if (typeof window.guardarSesion === 'function') {
+            window.guardarSesion(userClean);
+          }
           localStorage.setItem('mr_usuario', userClean);
           window.location.href = 'dashboard.html';
         })
@@ -231,6 +234,9 @@
           if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-login-credentials' || error.code === 'auth/invalid-credential') {
              auth.createUserWithEmailAndPassword(email, pass)
                .then(() => {
+                 if (typeof window.guardarSesion === 'function') {
+                   window.guardarSesion(userClean);
+                 }
                  localStorage.setItem('mr_usuario', userClean);
                  window.location.href = 'dashboard.html';
                })

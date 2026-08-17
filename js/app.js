@@ -7,7 +7,11 @@
 
 /** Protege páginas: redirige al login si no hay sesión */
 function protegerPagina(rolEsperado) {
-  const usuario = localStorage.getItem('mr_usuario');
+  // Primero intentar sesion con expiración (nueva), luego compatibilidad
+  const usuario = (typeof window.sesionValida === 'function')
+    ? window.sesionValida()
+    : localStorage.getItem('mr_usuario');
+
   if (!usuario) {
     window.location.href = 'index.html';
     return null;
@@ -17,10 +21,11 @@ function protegerPagina(rolEsperado) {
     return null;
   }
 
-  // Verificar estado con Firebase Auth asíncronamente
+  // Verificar también con Firebase Auth
   if (typeof auth !== 'undefined') {
     auth.onAuthStateChanged((user) => {
       if (!user) {
+        localStorage.removeItem('mr_sesion');
         localStorage.removeItem('mr_usuario');
         window.location.href = 'index.html';
       }
@@ -32,12 +37,19 @@ function protegerPagina(rolEsperado) {
 
 /** Cierra sesión */
 function cerrarSesion() {
+  // Usar la función completa si está disponible (incluye borrar cifrado)
+  if (typeof window.cerrarSesionCompleta === 'function') {
+    window.cerrarSesionCompleta();
+    return;
+  }
   if (typeof auth !== 'undefined') {
     auth.signOut().then(() => {
+      localStorage.removeItem('mr_sesion');
       localStorage.removeItem('mr_usuario');
       window.location.href = 'index.html';
     });
   } else {
+    localStorage.removeItem('mr_sesion');
     localStorage.removeItem('mr_usuario');
     window.location.href = 'index.html';
   }

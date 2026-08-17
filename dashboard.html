@@ -227,7 +227,12 @@
   <div class="modal-overlay" id="modalChat">
     <div class="modal-sheet glass-card" style="max-height: 85vh; display: flex; flex-direction: column;">
       <div class="modal-handle"></div>
-      <div class="modal-title"><i class="fa-solid fa-comments"></i> Nuestro Chat Privado</div>
+      <div class="modal-title" style="justify-content:space-between;">
+        <span><i class="fa-solid fa-comments"></i> Chat Privado</span>
+        <button id="btnCifradoStatus" onclick="abrirModal('modalCifrado')" style="background:none;border:none;cursor:pointer;font-size:1.1rem;padding:4px;" title="Estado del cifrado">
+          <span id="cifradoIcono">🔓</span>
+        </button>
+      </div>
       
       <div id="chatContainer" class="chat-container">
         <div class="chat-empty">Cargando mensajes... 💬</div>
@@ -251,7 +256,29 @@
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="js/mensajes.js"></script>
   <script src="js/firebase-config.js"></script>
+  <script src="js/crypto-chat.js"></script>
   <script src="js/app.js"></script>
+
+  <!-- MODAL: CIFRADO DEL CHAT -->
+  <div class="modal-overlay" id="modalCifrado">
+    <div class="modal-sheet glass-card" style="text-align:center;">
+      <div class="modal-handle"></div>
+      <div style="font-size:2.5rem; margin-bottom:8px;">🔐</div>
+      <div class="modal-title" style="justify-content:center;">Clave del Chat Privado</div>
+      <p style="font-size:0.85rem; color:rgba(94,11,21,0.7); margin-bottom:20px; line-height:1.5;">
+        Los mensajes se cifran con AES-256 antes de guardarse en Firebase.<br>
+        Solo quién conozca esta clave puede leerlos. 🔒
+      </p>
+      <input type="password" id="inputClaveCifrado" placeholder="Escribe la frase secreta..." style="width:100%; padding:12px 16px; border-radius:25px; border:1.5px solid var(--oro); background:white; color:var(--vinotinto); outline:none; font-family:inherit; font-size:0.95rem; margin-bottom:16px;">
+      <div id="cifradoError" style="color:#b00020; font-size:0.8rem; margin-bottom:10px; display:none;">La clave no puede estar vacía. 🥺</div>
+      <button class="btn btn-primary btn-full" onclick="activarCifrado()">
+        <i class="fa-solid fa-lock"></i> Activar cifrado
+      </button>
+      <button class="btn btn-outline btn-full mt-16" onclick="cerrarModal('modalCifrado')" style="margin-top:10px;">
+        <i class="fa-solid fa-xmark"></i> Cancelar (chat sin cifrar)
+      </button>
+    </div>
+  </div>
 
   <script>
     const usuarioActual = protegerPagina();
@@ -284,29 +311,68 @@
 
       // === 2. CHAT EN TIEMPO REAL ===
       if ("Notification" in window) Notification.requestPermission();
-      let isInitialLoad = true;
 
-      db.ref('chat').limitToLast(30).on('value', (snapshot) => {
+      // Limpiar mensajes > 30 días al cargar
+      if (typeof window.limpiarChatAntiguo === 'function') {
+        window.limpiarChatAntiguo();
+      }
+
+      // Función para activar el cifrado desde el modal
+      window.activarCifrado = async function() {
+        const frase = document.getElementById('inputClaveCifrado').value.trim();
+        const errEl = document.getElementById('cifradoError');
+        if (!frase) { errEl.style.display = 'block'; return; }
+        errEl.style.display = 'none';
+        await window.inicializarClave(frase);
+        document.getElementById('cifradoIcono').textContent = '🔒';
+        document.getElementById('inputClaveCifrado').value = '';
+        cerrarModal('modalCifrado');
+        // Recargar mensajes con la nueva clave
+        db.ref('chat').limitToLast(30).once('value', renderMensajes);
+      };
+
+      // Función para renderizar mensajes (con descifrado si aplica)
+      async function renderMensajes(snapshot) {
         const container = document.getElementById('chatContainer');
         const badge = document.getElementById('chatBadge');
         container.innerHTML = '';
 
         if (!snapshot.exists() || !snapshot.hasChildren()) {
           container.innerHTML = '<div class="chat-empty">Aún no hay mensajes. ¡Empieza el chat! 💬</div>';
-          isInitialLoad = false;
           return;
         }
 
-        let lastMsg = null;
+        const promises = [];
         snapshot.forEach((child) => {
           const msg = child.val();
-          lastMsg = msg;
           const msgId = child.key;
+          promises.push((async () => {
+            let textoMostrar = msg.texto || '';
+            // Descifrar si el mensaje está marcado como cifrado y hay clave activa
+            if (msg.cifrado && window.cifradoActivo && window.cifradoActivo() && window._mrCryptoKey) {
+              textoMostrar = await window.descifrarMensaje(textoMostrar, window._mrCryptoKey);
+            }
+            return { msg, msgId, textoMostrar };
+          })());
+        });
+
+        const mensajesResueltos = await Promise.all(promises);
+        let lastMsg = null;
+
+        mensajesResueltos.forEach(({ msg, msgId, textoMostrar }) => {
+          lastMsg = msg;
           const div = document.createElement('div');
           const esPropio = msg.usuario && msg.usuario.toLowerCase() === usuarioActual.toLowerCase();
           div.className = `msg msg-${(msg.usuario||'guti').toLowerCase()} ${esPropio ? 'msg-derecha' : 'msg-izquierda'}`;
           div.style.position = 'relative';
-          div.textContent = msg.texto || '';
+          div.textContent = textoMostrar;
+
+          if (msg.cifrado) {
+            const lockBadge = document.createElement('span');
+            lockBadge.style.cssText = 'font-size:0.65rem; opacity:0.6; margin-left:4px;';
+            lockBadge.textContent = '🔒';
+            div.appendChild(lockBadge);
+          }
 
           if (msg.hearts && msg.hearts > 0) {
             const hb = document.createElement('div');
@@ -318,31 +384,35 @@
           let lastTap = 0;
           div.addEventListener('touchend', function(e) {
             let now = new Date().getTime();
-            if (now - lastTap < 500 && now - lastTap > 0) {
-              e.preventDefault();
-              db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
-            }
+            if (now - lastTap < 500 && now - lastTap > 0) { e.preventDefault(); db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1); }
             lastTap = now;
           });
-          div.addEventListener('dblclick', function() {
-            db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
-          });
+          div.addEventListener('dblclick', function() { db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1); });
 
           container.appendChild(div);
         });
 
         container.scrollTop = container.scrollHeight;
+        return lastMsg;
+      }
+
+      let isInitialLoad = true;
+
+      db.ref('chat').limitToLast(30).on('value', async (snapshot) => {
+        const lastMsg = await renderMensajes(snapshot);
+        const badge = document.getElementById('chatBadge');
 
         if(!isInitialLoad && lastMsg && lastMsg.usuario && lastMsg.usuario.toLowerCase() !== usuarioActual.toLowerCase()) {
           if(!document.getElementById('modalChat').classList.contains('active')) {
             badge.style.display = 'flex';
           }
           if (document.hidden && Notification.permission === "granted") {
-            new Notification(`Nuevo mensaje de ${lastMsg.usuario} 💖`, { body: lastMsg.texto, icon: 'img/logo.png' });
+            new Notification(`Nuevo mensaje de ${lastMsg.usuario} 💖`, { body: '[Mensaje privado]', icon: 'img/logo.png' });
           }
         }
         isInitialLoad = false;
       });
+
 
       window.mandarMensaje = () => {
         const input = document.getElementById('chatInput');
