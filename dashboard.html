@@ -23,13 +23,38 @@
     .amor-corazon{font-size:4rem;animation:heartbeat 1.2s ease-in-out infinite;display:block;margin-bottom:12px}
     .lightbox-img{max-width:100%;max-height:60vh;border-radius:16px;margin-bottom:12px;box-shadow:0 8px 40px rgba(0,0,0,.3)}
     .lightbox-caption{color:var(--vinotinto);font-weight:700;text-align:center;font-size:.95rem}
-    .swiper { width: 100%; height: 60vh; border-radius: 16px; margin-top: 15px; }
+    /* Galería Grid */
+    .galeria-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+    .galeria-grid img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; cursor: pointer; transition: transform 0.2s; }
+    .galeria-grid img:active { transform: scale(0.97); }
+    .galeria-placeholder { aspect-ratio:1; background:rgba(94,11,21,.08); border-radius:12px; display:flex; align-items:center; justify-content:center; color:rgba(94,11,21,.3); font-size:1.8rem; }
+    /* Swiper Carrusel */
+    .swiper { width: 100%; height: 55vw; max-height: 320px; border-radius: 16px; margin-top: 10px; }
     .swiper-slide { text-align: center; display: flex; justify-content: center; align-items: center; background: #000; border-radius: 16px; overflow: hidden; }
     .swiper-slide img { display: block; width: 100%; height: 100%; object-fit: contain; }
+    /* Toggle vista galería */
+    .vista-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+    .vista-btn { flex: 1; padding: 8px; border-radius: 20px; border: 1px solid var(--oro); background: transparent; color: var(--vinotinto); font-weight: 700; cursor: pointer; font-size: 0.8rem; transition: 0.2s; }
+    .vista-btn.active { background: var(--vinotinto); color: white; border-color: var(--vinotinto); }
+    /* Mood */
     .mood-btn { background: rgba(255,255,255,0.2); border: 1px solid var(--oro); border-radius: 20px; padding: 5px 15px; cursor: pointer; color: var(--vinotinto); font-weight: 600; margin: 5px; transition: 0.3s; }
     .mood-btn.active { background: var(--vinotinto); color: white; }
-    .audio-player { margin-top: 20px; width: 100%; text-align: center; }
-    .audio-player audio { width: 100%; max-width: 300px; height: 35px; border-radius: 20px; }
+    /* Chat burbuja */
+    .chat-bubble { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--vinotinto); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; cursor: pointer; transition: transform 0.3s; border: 2px solid var(--oro); }
+    .chat-bubble:active { transform: scale(0.9); }
+    .chat-badge { position: absolute; top: 0; right: 0; background: #ff4757; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
+    /* Chat modal */
+    .chat-container { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; min-height: 200px; max-height: 38vh; background: rgba(94,11,21,0.04); border-radius: 12px; border: 1px solid rgba(200,160,80,0.2); }
+    .msg { padding: 10px 16px; border-radius: 20px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; position: relative; word-break: break-word; }
+    .msg-fabi { background: var(--vinotinto); color: white; align-self: flex-start; border-bottom-left-radius: 4px; }
+    .msg-guti { background: var(--oro); color: var(--vinotinto); align-self: flex-end; border-bottom-right-radius: 4px; }
+    .msg-derecha { align-self: flex-end; }
+    .msg-izquierda { align-self: flex-start; }
+    .chat-input-area { display: flex; gap: 8px; padding: 8px 0 0; }
+    .chat-input-area input { flex: 1; padding: 12px 16px; border-radius: 25px; border: 1px solid var(--oro); background: white; color: var(--vinotinto); outline: none; font-family: inherit; font-size: 0.9rem; }
+    .chat-input-area input::placeholder { color: rgba(94,11,21,0.4); }
+    .chat-input-area button { background: var(--vinotinto); color: white; width: 46px; height: 46px; border-radius: 50%; border: none; cursor: pointer; font-size: 1rem; display: flex; align-items:center; justify-content:center; flex-shrink: 0; }
+    .chat-empty { text-align: center; color: rgba(94,11,21,0.4); font-size: 0.9rem; padding: 30px 10px; }
   </style>
 </head>
 <body>
@@ -95,13 +120,6 @@
       <div style="margin-top:10px; font-size:0.8rem; color:var(--oro); font-weight:600;" id="partnerMood">Cargando estado de tu pareja...</div>
     </div>
     
-    <!-- REPRODUCTOR -->
-    <div class="audio-player fade-in">
-      <audio controls loop>
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-        Tu navegador no soporta audio.
-      </audio>
-    </div>
 
     <!-- SECCIONES GRID -->
     <div class="section-grid fade-in">
@@ -129,18 +147,33 @@
     <div class="modal-sheet glass-card">
       <div class="modal-handle"></div>
       <div class="modal-title"><i class="fa-solid fa-images"></i> Nuestra Galería</div>
-      <p style="font-size:.85rem;color:var(--oro);margin-bottom:16px;font-weight:600">Desliza para ver más 📸</p>
-      
-      <div class="swiper mySwiper">
-        <div class="swiper-wrapper" id="swiperWrapper">
-          <!-- Slides cargados dinámicamente -->
-        </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next" style="color:var(--oro);"></div>
-        <div class="swiper-button-prev" style="color:var(--oro);"></div>
+
+      <!-- Toggle de vista -->
+      <div class="vista-toggle">
+        <button class="vista-btn active" id="btnVistaGrid" onclick="cambiarVista('grid')">
+          <i class="fa-solid fa-grip"></i> Cuadrícula
+        </button>
+        <button class="vista-btn" id="btnVistaSwiper" onclick="cambiarVista('swiper')">
+          <i class="fa-solid fa-images"></i> Carrusel
+        </button>
       </div>
 
-      <p id="galeriaHint" style="font-size:.8rem;color:rgba(94,11,21,.5);margin-top:14px;text-align:center">
+      <!-- Galería Grid (modo original) -->
+      <div id="galeriaGridWrap">
+        <div class="galeria-grid" id="galeriaGrid"></div>
+      </div>
+
+      <!-- Swiper (oculto por defecto) -->
+      <div id="galeriaSwiperWrap" style="display:none;">
+        <div class="swiper mySwiper">
+          <div class="swiper-wrapper" id="swiperWrapper"></div>
+          <div class="swiper-pagination"></div>
+          <div class="swiper-button-next" style="color:var(--oro);"></div>
+          <div class="swiper-button-prev" style="color:var(--oro);"></div>
+        </div>
+      </div>
+
+      <p id="galeriaHint" style="font-size:.8rem;color:rgba(94,11,21,.5);margin-top:14px;text-align:center;display:none">
         Guti debe agregar las fotos desde el panel admin 📸
       </p>
       <button class="btn btn-outline btn-full mt-16" onclick="cerrarModal('modalFotos')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
@@ -185,7 +218,7 @@
       <div class="modal-title"><i class="fa-solid fa-comments"></i> Nuestro Chat Privado</div>
       
       <div id="chatContainer" class="chat-container">
-        <!-- Los mensajes aparecerán aquí -->
+        <div class="chat-empty">Cargando mensajes... 💬</div>
       </div>
 
       <div class="chat-input-area">
@@ -193,53 +226,38 @@
         <button onclick="mandarMensaje()"><i class="fa-solid fa-paper-plane"></i></button>
       </div>
       
-      <button class="btn btn-outline btn-full mt-10" onclick="cerrarModal('modalChat')"><i class="fa-solid fa-xmark"></i> Cerrar</button>
+      <button class="btn btn-outline btn-full mt-10" onclick="cerrarModal('modalChat')" style="margin-top:10px;"><i class="fa-solid fa-xmark"></i> Cerrar</button>
     </div>
   </div>
 
-  <!-- ESTILOS EXTRAS PARA EL CHAT -->
-  <style>
-    .chat-bubble { position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; background: var(--vinotinto); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.3); z-index: 999; cursor: pointer; transition: transform 0.3s; border: 2px solid var(--oro); }
-    .chat-bubble:active { transform: scale(0.9); }
-    .chat-badge { position: absolute; top: 0; right: 0; background: #ff4757; color: white; width: 20px; height: 20px; border-radius: 50%; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; border: 2px solid white; }
-    .chat-container { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: rgba(255,255,255,0.05); border-radius: 12px; }
-    .msg { padding: 8px 14px; border-radius: 18px; max-width: 80%; font-size: 0.9rem; line-height: 1.4; position: relative; }
-    .msg-fabi { background: var(--vinotinto); color: white; }
-    .msg-guti { background: var(--oro); color: var(--vinotinto); }
-    .msg-derecha { align-self: flex-end; border-bottom-right-radius: 4px; }
-    .msg-izquierda { align-self: flex-start; border-bottom-left-radius: 4px; }
-    .chat-input-area { display: flex; gap: 8px; padding: 5px; }
-    .chat-input-area input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid var(--oro); background: rgba(255,255,255,0.1); color: var(--vinotinto); outline: none; }
-    .chat-input-area button { background: var(--vinotinto); color: white; width: 45px; height: 45px; border-radius: 50%; border: none; cursor: pointer; }
-  </style>
+
 
   <!-- SCRIPTS DE FIREBASE -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
   <script src="js/mensajes.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/app.js"></script>
 
   <script>
-    const usuarioActual = protegerPagina(); // Permite tanto a Fabi como a Guti
+    const usuarioActual = protegerPagina();
+    let modoVista = 'grid';
+    let fotosDisponibles = [];
+
     if(usuarioActual){
       document.getElementById('nombreUsuario').textContent = usuarioActual;
       iniciarContador('contadorTiempo', new Date(2024, 8, 1));
 
-      // Si el usuario es Guti, mostrar el botón de administración y adaptar la vista
       if (usuarioActual === 'Guti') {
         const btnAdmin = document.getElementById('btnAdmin');
         if (btnAdmin) btnAdmin.style.display = 'inline-flex';
-        
-        // Cambiar firma de la tarjeta para que tenga sentido para Guti
         const firma = document.querySelector('.msg-firma');
         if (firma) firma.textContent = '— Tu mensaje para Fabi 💌';
       }
 
-      // === 1. SINCRONIZACIÓN DE DATOS (CONFIG) ===
+      // === 1. CONFIG DESDE FIREBASE ===
       db.ref('config').on('value', (snapshot) => {
         const datos = snapshot.val();
         if (datos && datos.mensaje && datos.mensaje.trim() !== "") {
@@ -247,77 +265,68 @@
           if(datos.pdfUrl) localStorage.setItem('mr_pdf_hitos_url', datos.pdfUrl);
           if(datos.fotos) localStorage.setItem('mr_fotos_cloud', datos.fotos);
         } else {
-          // Si está vacío, usamos los mensajes aleatorios de mensajes.js
-          const fraseAleatoria = typeof obtenerMensajeDelDia === 'function' ? obtenerMensajeDelDia().texto : "¡Te amo más que ayer! 💖";
+          const fraseAleatoria = typeof obtenerMensajeDelDia === 'function' ? obtenerMensajeDelDia().texto : '¡Te amo más que ayer! 💖';
           document.getElementById('msgTexto').textContent = fraseAleatoria;
         }
       });
 
       // === 2. CHAT EN TIEMPO REAL ===
-      // Solicitar permisos de notificación
-      if ("Notification" in window) {
-        Notification.requestPermission();
-      }
-      
+      if ("Notification" in window) Notification.requestPermission();
       let isInitialLoad = true;
-      
-      db.ref('chat').limitToLast(20).on('value', (snapshot) => {
+
+      db.ref('chat').limitToLast(30).on('value', (snapshot) => {
         const container = document.getElementById('chatContainer');
         const badge = document.getElementById('chatBadge');
         container.innerHTML = '';
-        
-        let lastMsg = null;
 
+        if (!snapshot.exists() || !snapshot.hasChildren()) {
+          container.innerHTML = '<div class="chat-empty">Aún no hay mensajes. ¡Empieza el chat! 💬</div>';
+          isInitialLoad = false;
+          return;
+        }
+
+        let lastMsg = null;
         snapshot.forEach((child) => {
           const msg = child.val();
           lastMsg = msg;
           const msgId = child.key;
           const div = document.createElement('div');
-          const esPropio = msg.usuario.toLowerCase() === usuarioActual.toLowerCase();
-          div.className = `msg msg-${msg.usuario.toLowerCase()} ${esPropio ? 'msg-derecha' : 'msg-izquierda'}`;
+          const esPropio = msg.usuario && msg.usuario.toLowerCase() === usuarioActual.toLowerCase();
+          div.className = `msg msg-${(msg.usuario||'guti').toLowerCase()} ${esPropio ? 'msg-derecha' : 'msg-izquierda'}`;
           div.style.position = 'relative';
-          div.textContent = msg.texto;
+          div.textContent = msg.texto || '';
 
-          // Mostrar reacción
           if (msg.hearts && msg.hearts > 0) {
-            const heartBadge = document.createElement('div');
-            heartBadge.style.cssText = 'position:absolute; bottom:-10px; right:5px; background:white; border-radius:10px; padding:2px 5px; font-size:0.8rem; box-shadow:0 2px 4px rgba(0,0,0,0.1); color:red;';
-            heartBadge.innerHTML = '❤️ ' + (msg.hearts > 1 ? `<span style="font-size:0.7rem">${msg.hearts}</span>` : '');
-            div.appendChild(heartBadge);
+            const hb = document.createElement('div');
+            hb.style.cssText = 'position:absolute;bottom:-10px;right:5px;background:white;border-radius:10px;padding:2px 6px;font-size:0.75rem;box-shadow:0 2px 4px rgba(0,0,0,0.1);';
+            hb.innerHTML = '❤️' + (msg.hearts > 1 ? ' ' + msg.hearts : '');
+            div.appendChild(hb);
           }
 
-          // Doble toque (Móvil) o Doble Clic (PC)
           let lastTap = 0;
           div.addEventListener('touchend', function(e) {
-             let currentTime = new Date().getTime();
-             let tapLength = currentTime - lastTap;
-             if (tapLength < 500 && tapLength > 0) {
-                 e.preventDefault();
-                 db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
-             }
-             lastTap = currentTime;
+            let now = new Date().getTime();
+            if (now - lastTap < 500 && now - lastTap > 0) {
+              e.preventDefault();
+              db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
+            }
+            lastTap = now;
           });
-          div.addEventListener('dblclick', function(e) {
-             db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
+          div.addEventListener('dblclick', function() {
+            db.ref('chat/' + msgId + '/hearts').set((msg.hearts || 0) + 1);
           });
 
           container.appendChild(div);
         });
-        
+
         container.scrollTop = container.scrollHeight;
-        
-        // Lógica de Notificaciones
-        if(!isInitialLoad && lastMsg && lastMsg.usuario.toLowerCase() !== usuarioActual.toLowerCase()) {
-          // Si el modal de chat está cerrado, mostramos el badge
-          if(document.getElementById('modalChat').style.display !== 'flex') {
+
+        if(!isInitialLoad && lastMsg && lastMsg.usuario && lastMsg.usuario.toLowerCase() !== usuarioActual.toLowerCase()) {
+          if(!document.getElementById('modalChat').classList.contains('active')) {
             badge.style.display = 'flex';
           }
-          // Enviar notificación nativa si la página está oculta (en otra pestaña) o minimizada
           if (document.hidden && Notification.permission === "granted") {
-            new Notification(`Nuevo mensaje de ${lastMsg.usuario} 💖`, {
-              body: lastMsg.texto,
-              icon: 'img/logo.png'
-            });
+            new Notification(`Nuevo mensaje de ${lastMsg.usuario} 💖`, { body: lastMsg.texto, icon: 'img/logo.png' });
           }
         }
         isInitialLoad = false;
@@ -325,57 +334,82 @@
 
       window.mandarMensaje = () => {
         const input = document.getElementById('chatInput');
-        if(input.value.trim()){
-          enviarChat(usuarioActual, input.value);
+        const texto = input.value.trim();
+        if(texto){
+          enviarChat(usuarioActual, texto);
           input.value = '';
           document.getElementById('chatBadge').style.display = 'none';
         }
       };
 
-      // === 3. GALERÍA SWIPER ===
-      window.renderGaleriaCloud = function() {
-        const wrapper = document.getElementById('swiperWrapper');
-        if(!wrapper) return;
-        wrapper.innerHTML = ''; 
-        
-        let fotosCloud = localStorage.getItem('mr_fotos_cloud') ? localStorage.getItem('mr_fotos_cloud').split(',') : [];
-        let fotosLocales = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS : ["1.jpg"];
-        
-        const todas = [...fotosCloud, ...fotosLocales.map(f => f.startsWith('http') ? f : 'img/'+f)].filter(f => f.trim() !== "");
+      document.getElementById('chatBubble').addEventListener('click', () => {
+        document.getElementById('chatBadge').style.display = 'none';
+      });
 
-        todas.forEach(src => {
+      // === 3. GALERIA DUAL (GRID + SWIPER) ===
+      function cargarFotos() {
+        let fotosCloud = localStorage.getItem('mr_fotos_cloud') ? localStorage.getItem('mr_fotos_cloud').split(',').map(f=>f.trim()).filter(f=>f) : [];
+        let fotosLocales = typeof FOTOS_PREDEFINIDAS !== 'undefined' ? FOTOS_PREDEFINIDAS.map(f => f.startsWith('http') ? f : 'img/' + f) : [];
+        fotosDisponibles = [...fotosCloud, ...fotosLocales];
+        renderVista();
+      }
+
+      window.cambiarVista = function(modo) {
+        modoVista = modo;
+        document.getElementById('btnVistaGrid').classList.toggle('active', modo === 'grid');
+        document.getElementById('btnVistaSwiper').classList.toggle('active', modo === 'swiper');
+        document.getElementById('galeriaGridWrap').style.display = modo === 'grid' ? 'block' : 'none';
+        document.getElementById('galeriaSwiperWrap').style.display = modo === 'swiper' ? 'block' : 'none';
+        renderVista();
+      };
+
+      function renderVista() {
+        const hint = document.getElementById('galeriaHint');
+        if (fotosDisponibles.length === 0) { if(hint) hint.style.display='block'; return; }
+        if(hint) hint.style.display='none';
+        modoVista === 'grid' ? renderGrid() : renderSwiper();
+      }
+
+      function renderGrid() {
+        const grid = document.getElementById('galeriaGrid');
+        grid.innerHTML = '';
+        fotosDisponibles.forEach((src, i) => {
+          const img = document.createElement('img');
+          img.src = src; img.loading = 'lazy'; img.alt = 'Foto '+(i+1);
+          img.onclick = () => { document.getElementById('lightboxImg').src=src; document.getElementById('lightboxCaption').textContent='Foto '+(i+1)+' 💖'; abrirModal('modalGaleria'); };
+          img.onerror = () => { const ph=document.createElement('div'); ph.className='galeria-placeholder'; ph.innerHTML='<i class="fa-solid fa-image"></i>'; img.parentNode&&img.parentNode.replaceChild(ph,img); };
+          grid.appendChild(img);
+        });
+      }
+
+      function renderSwiper() {
+        const wrapper = document.getElementById('swiperWrapper');
+        wrapper.innerHTML = '';
+        fotosDisponibles.forEach(src => {
           const slide = document.createElement('div');
           slide.className = 'swiper-slide';
           const img = document.createElement('img');
-          img.src = src;
-          img.loading = "lazy";
+          img.src=src; img.loading='lazy';
+          img.onerror = () => slide.parentNode&&slide.parentNode.removeChild(slide);
           slide.appendChild(img);
           wrapper.appendChild(slide);
         });
-
-        // Initialize Swiper
-        if (window.mySwiperInstance) {
-          window.mySwiperInstance.destroy();
-        }
+        if (window.mySwiperInstance) { window.mySwiperInstance.destroy(true,true); }
         window.mySwiperInstance = new Swiper(".mySwiper", {
-          navigation: { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" },
-          pagination: { el: ".swiper-pagination", clickable: true, dynamicBullets: true },
-          grabCursor: true,
-          loop: todas.length > 1
+          navigation:{nextEl:".swiper-button-next",prevEl:".swiper-button-prev"},
+          pagination:{el:".swiper-pagination",clickable:true,dynamicBullets:true},
+          grabCursor:true, loop: fotosDisponibles.length>1
         });
-      };
+      }
 
-      document.getElementById('cardFotos').onclick = () => {
-        abrirModal('modalFotos');
-        renderGaleriaCloud();
-      };
+      document.getElementById('cardFotos').onclick = () => { abrirModal('modalFotos'); cargarFotos(); };
 
-      // === 4. MOOD TRACKER & CALENDARIO ===
+      // === 4. MOOD + CALENDARIO ===
       const calcularDiasAniversario = () => {
         const hoy = new Date();
-        const anio = hoy.getMonth() >= 8 ? hoy.getFullYear() + 1 : hoy.getFullYear();
-        const prox = new Date(anio, 8, 1); // 1 de Septiembre (mes 8)
-        const diff = Math.ceil((prox - hoy) / (1000 * 60 * 60 * 24));
+        const anio = (hoy.getMonth() > 8 || (hoy.getMonth()===8 && hoy.getDate()>=1)) ? hoy.getFullYear()+1 : hoy.getFullYear();
+        const prox = new Date(anio, 8, 1);
+        const diff = Math.ceil((prox - hoy) / (1000*60*60*24));
         document.getElementById('diasFaltantes').textContent = diff;
       };
       calcularDiasAniversario();
@@ -391,14 +425,23 @@
       db.ref('moods').on('value', snap => {
         const moods = snap.val() || {};
         const partner = usuarioActual === 'Fabi' ? 'Guti' : 'Fabi';
-        if (moods[partner]) {
-          document.getElementById('partnerMood').textContent = `${partner} se siente: ${moods[partner]}`;
+        const el = document.getElementById('partnerMood');
+        el.textContent = moods[partner] ? `${partner} se siente: ${moods[partner]}` : '';
+      });
+
+      db.ref('moods/' + usuarioActual).once('value', snap => {
+        const mood = snap.val();
+        if(mood) {
+          if(mood.includes('Feliz')) document.getElementById('mood-Feliz').classList.add('active');
+          else if(mood.includes('extraño')) document.getElementById('mood-Extrano').classList.add('active');
+          else if(mood.includes('Cansada')) document.getElementById('mood-Cansada').classList.add('active');
         }
       });
 
       window.abrirHitosPdf = function() {
-        const url = localStorage.getItem('mr_pdf_hitos_url') || 'hitos.pdf';
-        window.open(url, '_blank');
+        const url = localStorage.getItem('mr_pdf_hitos_url') || localStorage.getItem('mr_pdf_hitos');
+        if(url && url.trim()) { window.open(url, '_blank'); }
+        else { alert('Guti aún no ha agregado el link del PDF de hitos. 🥺'); }
       };
       document.getElementById('btnHitosPdf').onclick = abrirHitosPdf;
 
