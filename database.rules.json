@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "chat": {
+      ".read": "auth != null",
+      ".write": "auth != null",
+      "$messageId": {
+        "hearts": {
+          ".write": "auth != null"
+        }
+      }
+    },
+    "config": {
+      ".read": "auth != null",
+      ".write": "auth != null && (auth.token.email == 'guti@mundoromix.com')"
+    },
+    "moods": {
+      ".read": "auth != null",
+      ".write": "auth != null"
+    }
+  }
+}
