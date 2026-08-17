@@ -23,12 +23,10 @@ if (!firebase.apps.length) {
 // Obtener referencias
 const db = firebase.database();
 const auth = firebase.auth();
-const storage = firebase.storage();
 
 // Hacer las referencias accesibles globalmente
 window.db = db;
 window.auth = auth;
-window.storage = storage;
 
 /**
  * Envía un mensaje al chat en tiempo real en Firebase
@@ -38,12 +36,25 @@ window.storage = storage;
 window.enviarChat = function(usuario, texto) {
   if (!texto || !texto.trim()) return;
   
-  db.ref('chat').push({
+  return db.ref('chat').push({
     usuario: usuario,
     texto: texto.trim(),
     timestamp: firebase.database.ServerValue.TIMESTAMP
   }).catch((error) => {
     console.error("Error al enviar mensaje: ", error);
+    // Mostrar error visible en el chat
+    const container = document.getElementById('chatContainer');
+    if (container) {
+      const errDiv = document.createElement('div');
+      errDiv.style.cssText = 'text-align:center; color:#b00020; font-size:0.8rem; padding:8px; background:rgba(255,0,0,0.1); border-radius:8px; margin:5px 0;';
+      if (error.code === 'PERMISSION_DENIED') {
+        errDiv.textContent = '❌ Sin permiso. Ve a Firebase > Realtime Database > Reglas y pónlas en modo prueba.';
+      } else {
+        errDiv.textContent = '❌ Error: ' + error.message;
+      }
+      container.appendChild(errDiv);
+      container.scrollTop = container.scrollHeight;
+    }
   });
 };
 
