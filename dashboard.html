@@ -526,8 +526,15 @@
         else { alert('Guti aún no ha agregado el link del PDF de hitos. 🥺'); }
       };
       document.getElementById('btnHitosPdf').onclick = abrirHitosPdf;
-
-      if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
+    }
+  </script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
     }
   </script>
 </body>

@@ -159,11 +159,15 @@
   <script src="js/firebase-config.js"></script>
   <script src="js/app.js"></script>
   <script>
-    // Registrar Service Worker con versión para forzar actualización
+    // Eliminar Service Worker para evitar cachés viejos
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=1.9')
-        .then(() => console.log('[MR] Service Worker actualizado ✅'))
-        .catch(err => console.warn('[MR] SW error:', err));
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      }).catch(function(err) {
+        console.log('Service Worker unregistration failed: ', err);
+      });
     }
   </script>
   <script>
