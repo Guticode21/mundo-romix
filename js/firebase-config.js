@@ -4,14 +4,13 @@
 // ==========================================
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBBAJAD0vtOEDjqWayop8XS04FCUsAt39E",
-  authDomain: "mundo-romix.firebaseapp.com",
-  databaseURL: "https://mundo-romix-default-rtdb.firebaseio.com",
-  projectId: "mundo-romix",
-  storageBucket: "mundo-romix.firebasestorage.app",
-  messagingSenderId: "598469388127",
-  appId: "1:598469388127:web:2fc8c0b26c413838f478ea",
-  measurementId: "G-332662Q1NN"
+  apiKey: "AIzaSyCoe0_wExK38b_93gTuZe_NrgMm_1QJV7o",
+  authDomain: "mundo-romix-d0b11.firebaseapp.com",
+  databaseURL: "https://mundo-romix-d0b11-default-rtdb.firebaseio.com",
+  projectId: "mundo-romix-d0b11",
+  storageBucket: "mundo-romix-d0b11.firebasestorage.app",
+  messagingSenderId: "475554294022",
+  appId: "1:475554294022:web:cc001f3ef5718ca7aa1687"
 };
 
 if (!firebase.apps.length) {
