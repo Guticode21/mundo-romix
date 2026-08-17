@@ -21,13 +21,13 @@ function protegerPagina(rolEsperado) {
     return null;
   }
 
-  // Verificar también con Firebase Auth
+  // Verificar también con Firebase Auth (solo log para debug, no sacar al usuario)
   if (typeof auth !== 'undefined') {
     auth.onAuthStateChanged((user) => {
       if (!user) {
-        localStorage.removeItem('mr_sesion');
-        localStorage.removeItem('mr_usuario');
-        window.location.href = 'index.html';
+        console.warn("[MR] Firebase Auth dice que no hay usuario activo. Podría ser un error de estado.");
+      } else {
+        console.log("[MR] Firebase Auth activo para:", user.email);
       }
     });
   }
